@@ -25,7 +25,7 @@ if not os.path.exists('architecture.jpg'):
 if not os.path.exists('gray256.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
-print(os.system('sudo apt install mlocate'))
+print(os.system('apt install mlocate'))
 print(os.system('ls'))
 print(os.system('pwd'))
 print(os.system('locate gray256.jpg'))
