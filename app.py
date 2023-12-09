@@ -26,7 +26,8 @@ if not os.path.exists('gray256.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
 print(os.system('ls'))
-img = Image.open('./gray256.jpg')
+print(os.system('pwd'))
+img = Image.open('file/gray256.jpg')
 print(img.size)
 exit(0)
 
