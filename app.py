@@ -25,7 +25,7 @@ if not os.path.exists('architecture.jpg'):
 if not os.path.exists('gray256.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
-
+print(os.system('ll'))
 
 # #### import m1
 # from fastchat.model import load_model, get_conversation_template
