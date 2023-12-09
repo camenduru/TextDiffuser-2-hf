@@ -365,7 +365,7 @@ with gr.Blocks() as demo:
             }
         </style>
 
-        <img src="file/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
+        <img src="./architecture.jpg" alt="textdiffuser-2" class="scaled-image">
         </div>
         """)
 
