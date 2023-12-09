@@ -16,10 +16,10 @@ alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase + str
 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ 
 '''
 
-if not os.path.exists('arial.ttf'):
-    os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/arial.ttf')
+if not os.path.exists('Arial.ttf'):
+    os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/Arial.ttf')
 
-if not os.path.exists('architecture.ttf'):
+if not os.path.exists('architecture.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/architecture.jpg')
 
 if not os.path.exists('gray256.jpg'):
@@ -72,7 +72,7 @@ text_encoder.resize_token_embeddings(len(tokenizer))
 #### for interactive
 stack = []
 state = 0   
-font = ImageFont.truetype("./arial.ttf", 32)
+font = ImageFont.truetype("./Arial.ttf", 32)
 
 def skip_fun(i, t):
     global state
