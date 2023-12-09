@@ -25,7 +25,7 @@ if not os.path.exists('architecture.jpg'):
 if not os.path.exists('gray256.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
-print(os.system('ll'))
+print(os.system('ls'))
 
 # #### import m1
 # from fastchat.model import load_model, get_conversation_template
@@ -332,7 +332,7 @@ with gr.Blocks() as demo:
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
-        <h2 style="font-weight: 900; font-size: 2.7rem; margin: 0rem">
+        <h2 style="font-weight: 900; font-size: 2.3rem; margin: 0rem">
             TextDiffuser-2: Unleashing the Power of Language Models for Text Rendering
         </h2>
         <h2 style="font-weight: 480; font-size: 1.4rem; margin: 0rem">
