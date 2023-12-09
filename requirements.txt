@@ -1,0 +1,7 @@
+setuptools==66.0.0
+datasets==2.11.0
+transformers==4.28.1
+accelerate==0.22.0 
+diffusers==0.24.0
+fschat==0.2.26
+pillow==10.1.0
