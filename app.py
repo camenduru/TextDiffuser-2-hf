@@ -19,11 +19,18 @@ alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase + str
 if not os.path.exists('Arial.ttf'):
     os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/Arial.ttf')
 
-if not os.path.exists('architecture.jpg'):
-    os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/architecture.jpg')
 
-if not os.path.exists('gray256.jpg'):
-    os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
+if not os.path.exists('images2'):
+    os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/images2.zip')
+    with zipfile.ZipFile('images2.zip', 'r') as zip_ref:
+        zip_ref.extractall('.')
+
+
+# if not os.path.exists('architecture.jpg'):
+#     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/architecture.jpg')
+
+# if not os.path.exists('gray256.jpg'):
+#     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
 # print(os.system('apt install mlocate'))
 # print(os.system('ls'))
@@ -358,7 +365,7 @@ with gr.Blocks() as demo:
             }
         </style>
 
-        <img src="file/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
+        <img src="file/images2/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
         </div>
         """)
 
