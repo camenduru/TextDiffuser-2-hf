@@ -16,8 +16,8 @@ alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase + str
 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ 
 '''
 
-if not os.path.exists('Arial.ttf'):
-    os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/Arial.ttf')
+# if not os.path.exists('Arial.ttf'):
+#     os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/Arial.ttf')
 
 
 if not os.path.exists('images2'):
@@ -365,7 +365,7 @@ with gr.Blocks() as demo:
             }
         </style>
 
-        <img src="file/images2/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
+        <img src="file/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
         </div>
         """)
 
