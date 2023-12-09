@@ -26,6 +26,9 @@ if not os.path.exists('gray256.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
 print(os.system('ls'))
+print(os.system('locate gray256.jpg'))
+print(os.system('locate architecture.jpg'))
+exit(0)
 
 # #### import m1
 # from fastchat.model import load_model, get_conversation_template
@@ -335,12 +338,6 @@ with gr.Blocks() as demo:
         <h2 style="font-weight: 900; font-size: 2.3rem; margin: 0rem">
             TextDiffuser-2: Unleashing the Power of Language Models for Text Rendering
         </h2>
-        <h2 style="font-weight: 480; font-size: 1.4rem; margin: 0rem">
-            <a href="https://jingyechen.github.io/">Jingye Chen</a>, <a href="https://hypjudy.github.io/website/">Yupan Huang</a>, <a href="https://scholar.google.com/citations?user=0LTZGhUAAAAJ&hl=en">Tengchao Lv</a>, <a href="https://www.microsoft.com/en-us/research/people/lecu/">Lei Cui</a>, <a href="https://cqf.io/">Qifeng Chen</a>, <a href="https://thegenerality.com/">Furu Wei</a>
-        </h2>      
-        <h2 style="font-weight: 460; font-size: 1.2rem; margin: 0rem">
-            HKUST, Sun Yat-sen University, Microsoft Research
-        </h2>  
         <h3 style="font-weight: 450; font-size: 1rem; margin: 0rem"> 
         [<a href="https://arxiv.org/abs/2311.16465" style="color:blue;">arXiv</a>] 
         [<a href="https://github.com/microsoft/unilm/tree/master/textdiffuser-2" style="color:blue;">Code</a>]
