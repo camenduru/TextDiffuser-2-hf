@@ -359,7 +359,13 @@ with gr.Blocks() as demo:
         👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can control the temperature
         </h2>
 
-        <img src="https://i.ibb.co/q1hxH0N/architecture.jpg" alt="textdiffuser-2">
+        <style>
+            .scaled-image {
+                transform: scale(0.75);
+            }
+        </style>
+        
+        <img src="https://i.ibb.co/q1hxH0N/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
         </div>
         """)
 
@@ -373,7 +379,7 @@ with gr.Blocks() as demo:
                 with gr.Row():
                     with gr.Column(scale=1):
                         i = gr.Image(label="Template", type='filepath', value=f'./gray256.jpg', height=256, width=256)
-                    with gr.Column(scale=3):
+                    with gr.Column(scale=1):
                         t = gr.Textbox(label="Template", placeholder='keyword')
                         redo = gr.Button(value='Redo - Cancel the last keyword') # 如何给b绑定事件
                         undo = gr.Button(value='Undo - Clear the canvas') # 如何给b绑定事件
