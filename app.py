@@ -25,13 +25,13 @@ if not os.path.exists('architecture.jpg'):
 if not os.path.exists('gray256.jpg'):
     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
-print(os.system('apt install mlocate'))
-print(os.system('ls'))
-print(os.system('pwd'))
-print(os.system('locate gray256.jpg'))
-# img = Image.open('locate gray256.jpg')
-# print(img.size)
-exit(0)
+# print(os.system('apt install mlocate'))
+# print(os.system('ls'))
+# print(os.system('pwd'))
+# print(os.system('locate gray256.jpg'))
+# # img = Image.open('locate gray256.jpg')
+# # print(img.size)
+# exit(0)
 
 # #### import m1
 # from fastchat.model import load_model, get_conversation_template
@@ -90,7 +90,7 @@ def exe_undo(i, t):
     global state
     state = 0
     stack = []
-    image = Image.open(f'{os.getcwd()}/gray256.jpg')
+    image = Image.open(f'./gray256.jpg')
     print('stack', stack)
     return image
 
@@ -101,7 +101,7 @@ def exe_redo(i, t):
 
     if len(stack) > 0:
         stack.pop()
-    image = Image.open(f'{os.getcwd()}/gray256.jpg')
+    image = Image.open(f'./gray256.jpg')
     draw = ImageDraw.Draw(image)
 
     for items in stack:
@@ -149,7 +149,7 @@ def get_pixels(i, t, evt: gr.SelectData):
         state = 0
 
 
-    image = Image.open(f'{os.getcwd()}/gray256.jpg')
+    image = Image.open(f'./gray256.jpg')
     draw = ImageDraw.Draw(image)
 
     for items in stack:
@@ -371,7 +371,7 @@ with gr.Blocks() as demo:
                 # 这里加一个会话框
                 with gr.Row():
                     with gr.Column(scale=1):
-                        i = gr.Image(label="Template", type='filepath', value=f'{os.getcwd()}/gray256.jpg', height=256, width=256)
+                        i = gr.Image(label="Template", type='filepath', value=f'./gray256.jpg', height=256, width=256)
                     with gr.Column(scale=3):
                         t = gr.Textbox(label="Template", placeholder='keyword')
                         redo = gr.Button(value='Redo - Cancel the last keyword') # 如何给b绑定事件
