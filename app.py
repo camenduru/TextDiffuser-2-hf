@@ -359,8 +359,7 @@ with gr.Blocks() as demo:
         👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can control the temperature
         </h2>
 
-
-        <img src="file/architecture.jpg" alt="textdiffuser-2">
+        <img src="https://ibb.co/mzdSnv9" alt="textdiffuser-2">
         </div>
         """)
 
