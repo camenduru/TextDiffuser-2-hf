@@ -82,6 +82,15 @@ unet = UNet2DConditionModel.from_pretrained(
 text_encoder.resize_token_embeddings(len(tokenizer))
 
 
+#### load lcm components
+model_id = "lambdalabs/sd-pokemon-diffusers"
+lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
+pipe = DiffusionPipeline.from_pretrained(model_id, unet=unet, tokenizer=tokenizer, text_encoder=text_encoder)
+pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
+pipe.load_lora_weights(lcm_lora_id)
+pipe.to(device="cuda")
+
+
 #### for interactive
 stack = []
 state = 0   
@@ -187,7 +196,7 @@ def get_pixels(i, t, evt: gr.SelectData):
 
 
 
-def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
+def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
 
     global stack
     global state
@@ -199,6 +208,7 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
         if slider_natural:
             user_prompt = f'<|startoftext|> {user_prompt} <|endoftext|>'
             composed_prompt = user_prompt
+            prompt = tokenizer.encode(user_prompt)
         else:
             if len(stack) == 0:
 
@@ -302,55 +312,67 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
                     composed_prompt = user_prompt
                     prompt = tokenizer.encode(user_prompt)
 
-        prompt = prompt[:77]
-        while len(prompt) < 77: 
-            prompt.append(tokenizer.pad_token_id) 
-        prompts_cond = prompt
-        prompts_nocond = [tokenizer.pad_token_id]*77
+            if radio == 'TextDiffuser-2':
+                prompt = prompt[:77]
+                while len(prompt) < 77: 
+                    prompt.append(tokenizer.pad_token_id) 
+                prompts_cond = prompt
+                prompts_nocond = [tokenizer.pad_token_id]*77
 
-        prompts_cond = [prompts_cond] * slider_batch
-        prompts_nocond = [prompts_nocond] * slider_batch
+                prompts_cond = [prompts_cond] * slider_batch
+                prompts_nocond = [prompts_nocond] * slider_batch
 
-        prompts_cond = torch.Tensor(prompts_cond).long().cuda()
-        prompts_nocond = torch.Tensor(prompts_nocond).long().cuda()
+                prompts_cond = torch.Tensor(prompts_cond).long().cuda()
+                prompts_nocond = torch.Tensor(prompts_nocond).long().cuda()
 
-        scheduler = DDPMScheduler.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="scheduler") 
-        scheduler.set_timesteps(slider_step) 
-        noise = torch.randn((slider_batch, 4, 64, 64)).to("cuda") 
-        input = noise
+                scheduler = DDPMScheduler.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="scheduler") 
+                scheduler.set_timesteps(slider_step) 
+                noise = torch.randn((slider_batch, 4, 64, 64)).to("cuda") 
+                input = noise
 
-        encoder_hidden_states_cond = text_encoder(prompts_cond)[0]
-        encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] 
+                encoder_hidden_states_cond = text_encoder(prompts_cond)[0]
+                encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] 
 
 
-        for t in tqdm(scheduler.timesteps):
-            with torch.no_grad():  # classifier free guidance
-                noise_pred_cond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_cond[:slider_batch]).sample # b, 4, 64, 64
-                noise_pred_uncond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_nocond[:slider_batch]).sample # b, 4, 64, 64
-                noisy_residual = noise_pred_uncond + slider_guidance * (noise_pred_cond - noise_pred_uncond) # b, 4, 64, 64     
-                prev_noisy_sample = scheduler.step(noisy_residual, t, input).prev_sample
-                input = prev_noisy_sample
+                for t in tqdm(scheduler.timesteps):
+                    with torch.no_grad():  # classifier free guidance
+                        noise_pred_cond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_cond[:slider_batch]).sample # b, 4, 64, 64
+                        noise_pred_uncond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_nocond[:slider_batch]).sample # b, 4, 64, 64
+                        noisy_residual = noise_pred_uncond + slider_guidance * (noise_pred_cond - noise_pred_uncond) # b, 4, 64, 64     
+                        prev_noisy_sample = scheduler.step(noisy_residual, t, input).prev_sample
+                        input = prev_noisy_sample
 
-        # decode
-        input = 1 / vae.config.scaling_factor * input 
-        images = vae.decode(input, return_dict=False)[0] 
-        width, height = 512, 512
-        results = []
-        new_image = Image.new('RGB', (2*width, 2*height))
-        for index, image in enumerate(images.float()):
-            image = (image / 2 + 0.5).clamp(0, 1).unsqueeze(0)
-            image = image.cpu().permute(0, 2, 3, 1).numpy()[0]
-            image = Image.fromarray((image * 255).round().astype("uint8")).convert('RGB')
-            results.append(image)
-            row = index // 2
-            col = index % 2
-            new_image.paste(image, (col*width, row*height))
-        # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
-        # results.insert(0, new_image)
-        # return new_image
-        os.system('nvidia-smi')
-        return tuple(results),  composed_prompt
-    
+                # decode
+                input = 1 / vae.config.scaling_factor * input 
+                images = vae.decode(input, return_dict=False)[0] 
+                width, height = 512, 512
+                results = []
+                new_image = Image.new('RGB', (2*width, 2*height))
+                for index, image in enumerate(images.float()):
+                    image = (image / 2 + 0.5).clamp(0, 1).unsqueeze(0)
+                    image = image.cpu().permute(0, 2, 3, 1).numpy()[0]
+                    image = Image.fromarray((image * 255).round().astype("uint8")).convert('RGB')
+                    results.append(image)
+                    row = index // 2
+                    col = index % 2
+                    new_image.paste(image, (col*width, row*height))
+                # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
+                # results.insert(0, new_image)
+                # return new_image
+                os.system('nvidia-smi')
+                return tuple(results),  composed_prompt
+            
+            elif radio == 'TextDiffuser-2-LCM':
+                generator = torch.Generator(device=pipe.device).manual_seed(random.randint(0,1000))
+                image = pipe(
+                    prompt=user_prompt,
+                    generator=generator,
+                    # negative_prompt=negative_prompt,
+                    num_inference_steps=slider_step,
+                    guidance_scale=1,
+                ).images[0]
+                return tuple([image]), composed_prompt
+            
 with gr.Blocks() as demo:
 
     gr.HTML(
@@ -359,6 +381,12 @@ with gr.Blocks() as demo:
         <h2 style="font-weight: 900; font-size: 2.5rem; margin: 0rem">
             TextDiffuser-2: Unleashing the Power of Language Models for Text Rendering
         </h2>
+        <h2 style="font-weight: 460; font-size: 1.1rem; margin: 0rem">
+            <a href="https://jingyechen.github.io/">Jingye Chen</a>, <a href="https://hypjudy.github.io/website/">Yupan Huang</a>, <a href="https://scholar.google.com/citations?user=0LTZGhUAAAAJ&hl=en">Tengchao Lv</a>, <a href="https://www.microsoft.com/en-us/research/people/lecu/">Lei Cui</a>, <a href="https://cqf.io/">Qifeng Chen</a>, <a href="https://thegenerality.com/">Furu Wei</a>
+        </h2>      
+        <h2 style="font-weight: 460; font-size: 1.1rem; margin: 0rem">
+            HKUST, Sun Yat-sen University, Microsoft Research
+        </h2>  
         <h3 style="font-weight: 450; font-size: 1rem; margin: 0rem"> 
         [<a href="https://arxiv.org/abs/2311.16465" style="color:blue;">arXiv</a>] 
         [<a href="https://github.com/microsoft/unilm/tree/master/textdiffuser-2" style="color:blue;">Code</a>]
@@ -376,7 +404,7 @@ with gr.Blocks() as demo:
             }
         </style>
         
-        <img src="https://i.ibb.co/vmrXRb5/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
+        <img src="https://i.ibb.co/56JVg5j/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
         </div>
         """)
 
@@ -403,8 +431,8 @@ with gr.Blocks() as demo:
                 undo.click(exe_undo, [i,t],[i])
                 skip_button.click(skip_fun, [i,t])
 
-                # radio = gr.Radio(["Stable Diffusion v2.1", "Stable Diffusion v1.5"], label="Pre-trained Model", value="Stable Diffusion v1.5")
-                slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser.")
+                radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choices of models", value="TextDiffuser-2")
+                slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2.")
                 slider_guidance = gr.Slider(minimum=1, maximum=9, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of classifier-free guidance and is set to 7.5 in default.")
                 slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
@@ -425,12 +453,13 @@ with gr.Blocks() as demo:
         
         # gr.Markdown("## Prompt Examples")
 
-        button.click(text_to_image, inputs=[prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
+        button.click(text_to_image, inputs=[prompt,keywords,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
             [
                 ["A beautiful city skyline stamp of Shanghai", ""],
+                ["A stamp of U.S.A.", ""],
                 ["A book cover named summer vibe", ""],
             ],
             prompt,
