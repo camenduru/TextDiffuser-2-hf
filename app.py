@@ -187,7 +187,7 @@ def get_pixels(i, t, evt: gr.SelectData):
 
 
 
-def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature):
+def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
 
     global stack
     global state
@@ -196,105 +196,111 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
         time1 = time.time()
         user_prompt = prompt
 
-
-        if len(stack) == 0:
-
-            if len(keywords.strip()) == 0:
-                template = f'Given a prompt that will be used to generate an image, plan the layout of visual text for the image. The size of the image is 128x128. Therefore, all properties of the positions should not exceed 128, including the coordinates of top, left, right, and bottom. All keywords are included in the caption. You dont need to specify the details of font styles. At each line, the format should be keyword left, top, right, bottom. So let us begin. Prompt: {user_prompt}'
-            else:
-                keywords = keywords.split('/')
-                keywords = [i.strip() for i in keywords]
-                template = f'Given a prompt that will be used to generate an image, plan the layout of visual text for the image. The size of the image is 128x128. Therefore, all properties of the positions should not exceed 128, including the coordinates of top, left, right, and bottom. In addition, we also provide all keywords at random order for reference. You dont need to specify the details of font styles. At each line, the format should be keyword left, top, right, bottom. So let us begin. Prompt: {prompt}. Keywords: {str(keywords)}'
-
-            msg = template
-            conv = get_conversation_template(m1_model_path)
-            conv.append_message(conv.roles[0], msg)
-            conv.append_message(conv.roles[1], None)
-            prompt = conv.get_prompt()
-            inputs = m1_tokenizer([prompt], return_token_type_ids=False)
-            inputs = {k: torch.tensor(v).to('cuda') for k, v in inputs.items()}
-            output_ids = m1_model.generate(
-                **inputs,
-                do_sample=True,
-                temperature=slider_temperature,
-                repetition_penalty=1.0,
-                max_new_tokens=512,
-            )
-
-            if m1_model.config.is_encoder_decoder:
-                output_ids = output_ids[0]
-            else:
-                output_ids = output_ids[0][len(inputs["input_ids"][0]) :]
-            outputs = m1_tokenizer.decode(
-                output_ids, skip_special_tokens=True, spaces_between_special_tokens=False
-            )
-            print(f"[{conv.roles[0]}]\n{msg}")
-            print(f"[{conv.roles[1]}]\n{outputs}")
-            ocrs = outputs.split('\n')
-            time2 = time.time()
-            print(time2-time1)
-            
-            # user_prompt = prompt
-            current_ocr = ocrs
-
-            ocr_ids = [] 
-            print('user_prompt', user_prompt)
-            print('current_ocr', current_ocr)
-
-            for ocr in current_ocr:
-                ocr = ocr.strip()
-
-                if len(ocr) == 0 or '###' in ocr or '.com' in ocr:
-                    continue
-
-                items = ocr.split()
-                pred = ' '.join(items[:-1])
-                box = items[-1]
-            
-                l,t,r,b = box.split(',')
-                l,t,r,b = int(l), int(t), int(r), int(b)
-                ocr_ids.extend(['l'+str(l), 't'+str(t), 'r'+str(r), 'b'+str(b)])
-
-                char_list = list(pred)
-                char_list = [f'[{i}]' for i in char_list]
-                ocr_ids.extend(char_list)
-                ocr_ids.append(tokenizer.eos_token_id)     
-
-            caption_ids = tokenizer(
-                user_prompt, truncation=True, return_tensors="pt"
-            ).input_ids[0].tolist() 
-
-            try:
-                ocr_ids = tokenizer.encode(ocr_ids)
-                prompt = caption_ids + ocr_ids
-            except:
-                prompt = caption_ids
-
-            composed_prompt = tokenizer.decode(prompt)
-        
-        else:
+        if slider_natural:
             user_prompt += ' <|endoftext|>'
+            composed_prompt = tokenizer.decode(prompt)
+        else:
+            if len(stack) == 0:
 
-            for items in stack:
-                position, text = items
+                if len(keywords.strip()) == 0:
+                    template = f'Given a prompt that will be used to generate an image, plan the layout of visual text for the image. The size of the image is 128x128. Therefore, all properties of the positions should not exceed 128, including the coordinates of top, left, right, and bottom. All keywords are included in the caption. You dont need to specify the details of font styles. At each line, the format should be keyword left, top, right, bottom. So let us begin. Prompt: {user_prompt}'
+                else:
+                    keywords = keywords.split('/')
+                    keywords = [i.strip() for i in keywords]
+                    template = f'Given a prompt that will be used to generate an image, plan the layout of visual text for the image. The size of the image is 128x128. Therefore, all properties of the positions should not exceed 128, including the coordinates of top, left, right, and bottom. In addition, we also provide all keywords at random order for reference. You dont need to specify the details of font styles. At each line, the format should be keyword left, top, right, bottom. So let us begin. Prompt: {prompt}. Keywords: {str(keywords)}'
 
-                if len(position) == 2:
-                    x, y = position
-                    x = x // 4
-                    y = y // 4
-                    text_str = ' '.join([f'[{c}]' for c in list(text)])
-                    user_prompt += f'<|startoftext|> l{x} t{y} {text_str} <|endoftext|>'
-                elif len(position) == 4:
-                    x0, y0, x1, y1 = position
-                    x0 = x0 // 4
-                    y0 = y0 // 4
-                    x1 = x1 // 4
-                    y1 = y1 // 4
-                    text_str = ' '.join([f'[{c}]' for c in list(text)])
-                    user_prompt += f'<|startoftext|> l{x0} t{y0} r{x1} b{y1} {text_str} <|endoftext|>'
+                msg = template
+                conv = get_conversation_template(m1_model_path)
+                conv.append_message(conv.roles[0], msg)
+                conv.append_message(conv.roles[1], None)
+                prompt = conv.get_prompt()
+                inputs = m1_tokenizer([prompt], return_token_type_ids=False)
+                inputs = {k: torch.tensor(v).to('cuda') for k, v in inputs.items()}
+                output_ids = m1_model.generate(
+                    **inputs,
+                    do_sample=True,
+                    temperature=slider_temperature,
+                    repetition_penalty=1.0,
+                    max_new_tokens=512,
+                )
 
-                composed_prompt = user_prompt
-                prompt = tokenizer.encode(user_prompt)
+                if m1_model.config.is_encoder_decoder:
+                    output_ids = output_ids[0]
+                else:
+                    output_ids = output_ids[0][len(inputs["input_ids"][0]) :]
+                outputs = m1_tokenizer.decode(
+                    output_ids, skip_special_tokens=True, spaces_between_special_tokens=False
+                )
+                print(f"[{conv.roles[0]}]\n{msg}")
+                print(f"[{conv.roles[1]}]\n{outputs}")
+                ocrs = outputs.split('\n')
+                time2 = time.time()
+                print(time2-time1)
+                
+                # user_prompt = prompt
+                current_ocr = ocrs
+
+                ocr_ids = [] 
+                print('user_prompt', user_prompt)
+                print('current_ocr', current_ocr)
+                
+
+                for ocr in current_ocr:
+                    ocr = ocr.strip()
+
+                    if len(ocr) == 0 or '###' in ocr or '.com' in ocr:
+                        continue
+
+                    items = ocr.split()
+                    pred = ' '.join(items[:-1])
+                    box = items[-1]
+                
+                    l,t,r,b = box.split(',')
+                    l,t,r,b = int(l), int(t), int(r), int(b)
+                    ocr_ids.extend(['l'+str(l), 't'+str(t), 'r'+str(r), 'b'+str(b)])
+
+                    char_list = list(pred)
+                    char_list = [f'[{i}]' for i in char_list]
+                    ocr_ids.extend(char_list)
+                    ocr_ids.append(tokenizer.eos_token_id)     
+
+                caption_ids = tokenizer(
+                    user_prompt, truncation=True, return_tensors="pt"
+                ).input_ids[0].tolist() 
+
+                try:
+                    ocr_ids = tokenizer.encode(ocr_ids)
+                    prompt = caption_ids + ocr_ids
+                except:
+                    prompt = caption_ids
+
+                composed_prompt = tokenizer.decode(prompt)
+            
+            else:
+                user_prompt += ' <|endoftext|>'
+
+                
+                for items in stack:
+                    position, text = items
+
+                    
+                    if len(position) == 2:
+                        x, y = position
+                        x = x // 4
+                        y = y // 4
+                        text_str = ' '.join([f'[{c}]' for c in list(text)])
+                        user_prompt += f'<|startoftext|> l{x} t{y} {text_str} <|endoftext|>'
+                    elif len(position) == 4:
+                        x0, y0, x1, y1 = position
+                        x0 = x0 // 4
+                        y0 = y0 // 4
+                        x1 = x1 // 4
+                        y1 = y1 // 4
+                        text_str = ' '.join([f'[{c}]' for c in list(text)])
+                        user_prompt += f'<|startoftext|> l{x0} t{y0} r{x1} b{y1} {text_str} <|endoftext|>'
+
+                    composed_prompt = user_prompt
+                    prompt = tokenizer.encode(user_prompt)
 
         prompt = prompt[:77]
         while len(prompt) < 77: 
@@ -340,8 +346,9 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
             col = index % 2
             new_image.paste(image, (col*width, row*height))
         # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
-        results.insert(0, new_image)
+        # results.insert(0, new_image)
         # return new_image
+        os.system('nvidia-smi')
         return tuple(results),  composed_prompt
     
 with gr.Blocks() as demo:
@@ -349,7 +356,7 @@ with gr.Blocks() as demo:
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
-        <h2 style="font-weight: 900; font-size: 2.3rem; margin: 0rem">
+        <h2 style="font-weight: 900; font-size: 2.5rem; margin: 0rem">
             TextDiffuser-2: Unleashing the Power of Language Models for Text Rendering
         </h2>
         <h3 style="font-weight: 450; font-size: 1rem; margin: 0rem"> 
@@ -384,7 +391,7 @@ with gr.Blocks() as demo:
                     with gr.Column(scale=1):
                         i = gr.Image(label="Template (Click to paint)", type='filepath', value=f'./gray256.jpg', height=256, width=256)
                     with gr.Column(scale=1):
-                        t = gr.Textbox(label="Template", placeholder='keyword')
+                        t = gr.Textbox(label="Keyword", value='input_keyword')
                         redo = gr.Button(value='Redo - Cancel the last keyword') # 如何给b绑定事件
                         undo = gr.Button(value='Undo - Clear the canvas') # 如何给b绑定事件
                         skip_button = gr.Button(value='Skip - Operate next keyword') # 如何给b绑定事件
@@ -399,7 +406,8 @@ with gr.Blocks() as demo:
                 slider_guidance = gr.Slider(minimum=1, maximum=9, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of classifier-free guidance and is set to 7.5 in default.")
                 slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
-                # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
+                slider_natural = gr.Checkbox(label="Natural image generation", bool=False, info="The text position and content info will not be incorporated.")
+                slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
                 button = gr.Button("Generate")
                             
             with gr.Column(scale=1):
@@ -415,7 +423,7 @@ with gr.Blocks() as demo:
         
         # gr.Markdown("## Prompt Examples")
 
-        button.click(text_to_image, inputs=[prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature], outputs=[output, composed_prompt])
+        button.click(text_to_image, inputs=[prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
