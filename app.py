@@ -418,7 +418,7 @@ with gr.Blocks() as demo:
             with gr.Column(scale=1):
                 prompt = gr.Textbox(label="Prompt. You can let language model automatically identify keywords, or provide them below", placeholder="A beautiful city skyline stamp of Shanghai")
                 keywords = gr.Textbox(label="(Optional) Keywords. Should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
-                positive_prompt = gr.Textbox(label="(Optional) Positive prompt", value=", showing different kinds of quails, digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
+                positive_prompt = gr.Textbox(label="(Optional) Positive prompt", value=", digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
 
                 with gr.Accordion("(Optional) Template - Click to paint", open=False):
                     with gr.Row():
@@ -436,11 +436,11 @@ with gr.Blocks() as demo:
                 skip_button.click(skip_fun, [i,t])
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
+                slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
                 slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2. You may decease the step to 4 when using LCM.")
                 slider_guidance = gr.Slider(minimum=1, maximum=13, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
                 slider_batch = gr.Slider(minimum=1, maximum=6, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
-                slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
                 # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
                 button = gr.Button("Generate")
                             
