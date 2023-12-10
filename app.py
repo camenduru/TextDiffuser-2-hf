@@ -285,6 +285,7 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                 except:
                     prompt = caption_ids
 
+                user_prompt = tokenizer.decode(prompt)
                 composed_prompt = tokenizer.decode(prompt)
             
             else:
@@ -310,13 +311,16 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                         text_str = ' '.join([f'[{c}]' for c in list(text)])
                         user_prompt += f'<|startoftext|> l{x0} t{y0} r{x1} b{y1} {text_str} <|endoftext|>'
 
-                    composed_prompt = user_prompt
+                    # composed_prompt = user_prompt
                     prompt = tokenizer.encode(user_prompt)
+                    composed_prompt = tokenizer.decode(prompt)
+
+                    prompt = prompt[:77]
+                    while len(prompt) < 77: 
+                        prompt.append(tokenizer.pad_token_id) 
 
             if radio == 'TextDiffuser-2':
-                prompt = prompt[:77]
-                while len(prompt) < 77: 
-                    prompt.append(tokenizer.pad_token_id) 
+                
                 prompts_cond = prompt
                 prompts_nocond = [tokenizer.pad_token_id]*77
 
@@ -371,8 +375,9 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                     # negative_prompt=negative_prompt,
                     num_inference_steps=slider_step,
                     guidance_scale=1,
-                ).images[0]
-                return tuple([image]), composed_prompt
+                    num_images_per_prompt=slider_batch,
+                ).images
+                return tuple(image), composed_prompt
             
 with gr.Blocks() as demo:
 
@@ -434,7 +439,7 @@ with gr.Blocks() as demo:
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choices of models", value="TextDiffuser-2")
                 slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2.")
-                slider_guidance = gr.Slider(minimum=1, maximum=9, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of classifier-free guidance and is set to 7.5 in default.")
+                slider_guidance = gr.Slider(minimum=1, maximum=9, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
                 slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
