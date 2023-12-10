@@ -6,3 +6,4 @@ diffusers==0.24.0
 fschat==0.2.26
 pillow==10.1.0
 sentencepiece
+torch==2.0.1
