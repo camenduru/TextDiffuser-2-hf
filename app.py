@@ -64,7 +64,7 @@ m1_model = AutoModelForCausalLM.from_pretrained(
 
 #### import diffusion models
 text_encoder = CLIPTextModel.from_pretrained(
-    'JingyeChen22/textdiffuser2-full-ft', subfolder="text_encoder", ignore_mismatched_sizes=True
+    'JingyeChen22/textdiffuser2-full-ft', subfolder="text_encoder"
 ).cuda().half()
 tokenizer = CLIPTokenizer.from_pretrained(
     'runwayml/stable-diffusion-v1-5', subfolder="tokenizer"
