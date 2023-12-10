@@ -322,9 +322,9 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                     prompt = tokenizer.encode(user_prompt)
                     composed_prompt = tokenizer.decode(prompt)
 
-                    prompt = prompt[:77]
-                    while len(prompt) < 77: 
-                        prompt.append(tokenizer.pad_token_id) 
+        prompt = prompt[:77]
+        while len(prompt) < 77: 
+            prompt.append(tokenizer.pad_token_id) 
 
         if radio == 'TextDiffuser-2':
             
