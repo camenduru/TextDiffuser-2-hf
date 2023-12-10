@@ -18,30 +18,13 @@ alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase + str
 0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ!"#$%&\'()*+,-./:;<=>?@[\\]^_`{|}~ 
 '''
 
-# if not os.path.exists('Arial.ttf'):
-#     os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/Arial.ttf')
-
-
 if not os.path.exists('images2'):
     os.system('wget https://huggingface.co/datasets/JingyeChen22/TextDiffuser/resolve/main/images2.zip')
     with zipfile.ZipFile('images2.zip', 'r') as zip_ref:
         zip_ref.extractall('.')
 
-
-# if not os.path.exists('architecture.jpg'):
-# os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/tree/main/layout_planner_m1')
-
-# if not os.path.exists('gray256.jpg'):
-#     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
-
-# print(os.system('apt install mlocate'))
 os.system('nvidia-smi')
 os.system('ls')
-# print(os.system('pwd'))
-# print(os.system('locate gray256.jpg'))
-# # img = Image.open('locate gray256.jpg')
-# # print(img.size)
-# exit(0)
 
 #### import m1
 from fastchat.model import load_model, get_conversation_template
@@ -372,9 +355,6 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                 row = index // 2
                 col = index % 2
                 new_image.paste(image, (col*width, row*height))
-            # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
-            # results.insert(0, new_image)
-            # return new_image
             os.system('nvidia-smi')
             torch.cuda.empty_cache()
             os.system('nvidia-smi')
@@ -400,7 +380,7 @@ with gr.Blocks() as demo:
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
-        <h2 style="font-weight: 900; font-size: 2.4rem; margin: 0rem">
+        <h2 style="font-weight: 900; font-size: 2.3rem; margin: 0rem">
             TextDiffuser-2: Unleashing the Power of Language Models for Text Rendering
         </h2>
         <h2 style="font-weight: 460; font-size: 1.1rem; margin: 0rem">
@@ -420,7 +400,7 @@ with gr.Blocks() as demo:
         👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can increase the temperature to enhance the diversity.
         </h2>
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
-        ✨ <b>[L] [C] [M]</b>: We also provide the model combining <b>TextDiffuser-2</b> and <b>LCM</b>. The inference speed is fast using less sampling steps. 
+        ✨ We also provide the experimental demo combining <b>TextDiffuser-2</b> and <b>LCM</b>. The inference is fast using less sampling steps, although the precision in text rendering might decrease.
         </h2>
 
         <style>
@@ -439,17 +419,15 @@ with gr.Blocks() as demo:
                 prompt = gr.Textbox(label="Input your prompt here.", placeholder="A beautiful city skyline stamp of Shanghai")
                 keywords = gr.Textbox(label="(Optional) Input your keywords here. Keywords should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
 
-                # 这里加一个会话框
-
                 with gr.Accordion("(Optional) Template - Click to paint", open=False):
                     with gr.Row():
                         with gr.Column(scale=1):
                             i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
                         with gr.Column(scale=1):
                             t = gr.Textbox(label="Keyword", value='input_keyword')
-                            redo = gr.Button(value='Redo - Cancel the last keyword') # 如何给b绑定事件
-                            undo = gr.Button(value='Undo - Clear the canvas') # 如何给b绑定事件
-                            skip_button = gr.Button(value='Skip - Operate next keyword') # 如何给b绑定事件
+                            redo = gr.Button(value='Redo - Cancel the last keyword') 
+                            undo = gr.Button(value='Undo - Clear the canvas') 
+                            skip_button = gr.Button(value='Skip - Operate next keyword') 
 
                 i.select(get_pixels,[i,t],[i])
                 redo.click(exe_redo, [i,t],[i])
@@ -458,7 +436,7 @@ with gr.Blocks() as demo:
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2. You may decease the step to 4 when using LCM.")
-                slider_guidance = gr.Slider(minimum=1, maximum=9, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
+                slider_guidance = gr.Slider(minimum=1, maximum=13, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
                 slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
@@ -471,28 +449,38 @@ with gr.Blocks() as demo:
                 with gr.Accordion("Intermediate results", open=False):
                     gr.Markdown("Composed prompt")
                     composed_prompt = gr.Textbox(label='')
-                
-                # with gr.Accordion("Intermediate results", open=False):
-                #     gr.Markdown("Layout, segmentation mask, and details of segmentation mask from left to right.")
-                #     intermediate_results = gr.Image(label='')
-        
-        # gr.Markdown("## Prompt Examples")
 
         button.click(text_to_image, inputs=[prompt,keywords,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
             [
-                ["A beautiful city skyline stamp of Shanghai", ""],
-                ["A stamp of U.S.A.", ""],
-                ["A book cover named summer vibe", ""],
+                ["A beautiful city skyline stamp of Shanghai", "", False],
+                ["A logo of superman", "", False],
+                ["A pencil sketch of a tree with the title nothing to tree here", "", False],
+                ["handwritten signature of peter", "", False],
+                ["Delicate greeting card of happy birthday to xyz", "", False],
+                ["Book cover of good morning baby ", "", False],
+                ["The handwritten words Hello World displayed on a wall in a neon light effect", "", False],
+                ["Logo of winter in artistic font, made by snowflake", "", False],
+                ["A book cover named summer vibe", "", False],
+                ["Newspaper with the title Love Story", "", False],
+                ["A logo for the company EcoGrow, where the letters look like plants", "EcoGrow", False],
+                ["A poster titled 'Quails of North America', showing different kinds of quails.", "Quails/of/North/America", False],
+                ["A detailed portrait of a fox guardian with a shield with Kung Fu written on it, by victo ngai and justin gerard, digital art, realistic painting, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation", "kung/fu", False],
+                ["A stamp of breath of the wild", "breath/of/the/wild", False],
+                ["Poster of the incoming movie Transformers", "Transformers", False],
+                ["Some apples are on a table", "", True],
+                ["a hotdog with mustard and other toppings on it", "", True],
+                ["a bathroom that has a slanted ceiling and a large bath tub", "", True],
+                ["a man holding a tennis racquet on a tennis court", "", True],
+                ["hamburger with bacon, lettuce, tomato and cheese| promotional image| hyperquality| products shot| full - color| extreme render| mouthwatering", "", True],
             ],
             prompt,
             keywords,
+            slider_natural,
             examples_per_page=10
         )
-
-
 
     gr.HTML(
         """
