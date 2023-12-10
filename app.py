@@ -83,28 +83,27 @@ pipe.load_lora_weights(lcm_lora_id)
 pipe.to(device="cuda")
 
 
-#### for interactive
-stack = []
-state = 0   
+
 font = ImageFont.truetype("./Arial.ttf", 32)
 
-def skip_fun(i, t):
-    global state
+def skip_fun(i, t, stack, state):
+    # global state
     state = 0
+    return i, stack, state
 
 
-def exe_undo(i, t):
-    global stack
-    global state
+def exe_undo(i, t, stack, state):
+    # global stack
+    # global state
     state = 0
     stack = []
     image = Image.open(f'./gray256.jpg')
     print('stack', stack)
-    return image
+    return image, stack, state
 
 
-def exe_redo(i, t):
-    global state 
+def exe_redo(i, t, stack, state):
+    # global state 
     state = 0
 
     if len(stack) > 0:
@@ -134,10 +133,10 @@ def exe_redo(i, t):
             draw.rectangle((x0,y0,x1,y1), outline=(255, 0, 0) )
 
     print('stack', stack)
-    return image
+    return image, stack, state
 
-def get_pixels(i, t, evt: gr.SelectData):
-    global state
+def get_pixels(i, t, stack, state, evt: gr.SelectData):
+    # global state
 
     text_position = evt.index
 
@@ -183,7 +182,7 @@ def get_pixels(i, t, evt: gr.SelectData):
 
     print('stack', stack)
 
-    return image
+    return image, stack, state
 
 
 font_layout = ImageFont.truetype('./Arial.ttf', 16)
@@ -407,6 +406,10 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
         
 with gr.Blocks() as demo:
 
+    #### for interactive
+    stack = []
+    state = 0   
+
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
@@ -447,21 +450,21 @@ with gr.Blocks() as demo:
                 keywords = gr.Textbox(label="(Optional) Keywords. Should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
                 positive_prompt = gr.Textbox(label="(Optional) Positive prompt", value=", digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
 
-                # # many encounter concurrent problem
-                # with gr.Accordion("(Optional) Template - Click to paint", open=False):
-                #     with gr.Row():
-                #         with gr.Column(scale=1):
-                #             i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
-                #         with gr.Column(scale=1):
-                #             t = gr.Textbox(label="Keyword", value='input_keyword')
-                #             redo = gr.Button(value='Redo - Cancel the last keyword') 
-                #             undo = gr.Button(value='Undo - Clear the canvas') 
-                #             skip_button = gr.Button(value='Skip - Operate the next keyword') 
+                # many encounter concurrent problem
+                with gr.Accordion("(Optional) Template - Click to paint", open=False):
+                    with gr.Row():
+                        with gr.Column(scale=1):
+                            i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
+                        with gr.Column(scale=1):
+                            t = gr.Textbox(label="Keyword", value='input_keyword')
+                            redo = gr.Button(value='Redo - Cancel the last keyword') 
+                            undo = gr.Button(value='Undo - Clear the canvas') 
+                            skip_button = gr.Button(value='Skip - Operate the next keyword') 
 
-                # i.select(get_pixels,[i,t],[i])
-                # redo.click(exe_redo, [i,t],[i])
-                # undo.click(exe_undo, [i,t],[i])
-                # skip_button.click(skip_fun, [i,t])
+                i.select(get_pixels,[i,t,stack,state],[i,stack,state])
+                redo.click(exe_redo, [i,t,stack,state],[i,stack,state])
+                undo.click(exe_undo, [i,t,stack,state],[i,stack,state])
+                skip_button.click(skip_fun, [i,t,stack,state], [i,stack,state])
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
