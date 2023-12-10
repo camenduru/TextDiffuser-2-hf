@@ -82,37 +82,43 @@ pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
 pipe.load_lora_weights(lcm_lora_id)
 pipe.to(device="cuda")
 
-
+global_dict = {}
 #### for interactive
-stack = []
-state = 0   
+# stack = []
+# state = 0   
 font = ImageFont.truetype("./Arial.ttf", 32)
 
-def skip_fun(i, t):
-    global state
-    state = 0
+def skip_fun(i, t, guest_id):
+    global_dict[guest_id]['state'] = 0
+    # global state
+    # state = 0
 
 
-def exe_undo(i, t):
-    global stack
-    global state
-    state = 0
-    stack = []
+def exe_undo(i, t, guest_id):
+
+    global_dict[guest_id]['stack'] = []
+    global_dict[guest_id]['state'] = 0
+
+    # global stack
+    # global state
+    # state = 0
+    # stack = []
     image = Image.open(f'./gray256.jpg')
-    print('stack', stack)
+    # print('stack', stack)
     return image
 
 
-def exe_redo(i, t):
-    global state 
-    state = 0
+def exe_redo(i, t, guest_id):
+    # global state 
+    # state = 0
+    global_dict[guest_id]['state'] = 0
 
-    if len(stack) > 0:
-        stack.pop()
+    if len(global_dict[guest_id]['stack']) > 0:
+        global_dict[guest_id]['stack'].pop()
     image = Image.open(f'./gray256.jpg')
     draw = ImageDraw.Draw(image)
 
-    for items in stack:
+    for items in global_dict[guest_id]['stack']:
         # print('now', items)
         text_position, t = items
         if len(text_position) == 2:
@@ -133,34 +139,34 @@ def exe_redo(i, t):
             draw.ellipse((leftUpPoint,rightDownPoint), fill='red')
             draw.rectangle((x0,y0,x1,y1), outline=(255, 0, 0) )
 
-    print('stack', stack)
+    print('stack', global_dict[guest_id]['stack'])
     return image
 
-def get_pixels(i, t, evt: gr.SelectData):
-    global state
+def get_pixels(i, t, guest_id, evt: gr.SelectData):
+    # global state
 
     text_position = evt.index
 
-    if state == 0:
-        stack.append(
+    if global_dict[guest_id]['state'] == 0:
+        global_dict[guest_id]['stack'].append(
             (text_position, t)
         )
-        print(text_position, stack)
-        state = 1
+        print(text_position, global_dict[guest_id]['stack'])
+        global_dict[guest_id]['state'] = 1
     else:
         
-        (_, t) = stack.pop()
+        (_, t) = global_dict[guest_id]['stack'].pop()
         x, y = _
-        stack.append(
+        global_dict[guest_id]['stack'].append(
             ((x,y,text_position[0],text_position[1]), t)
         )
-        state = 0
+        global_dict[guest_id]['state'] = 0
 
 
     image = Image.open(f'./gray256.jpg')
     draw = ImageDraw.Draw(image)
 
-    for items in stack:
+    for items in global_dict[guest_id]['stack']:
         # print('now', items)
         text_position, t = items
         if len(text_position) == 2:
@@ -181,7 +187,7 @@ def get_pixels(i, t, evt: gr.SelectData):
             draw.ellipse((leftUpPoint,rightDownPoint), fill='red')
             draw.rectangle((x0,y0,x1,y1), outline=(255, 0, 0) )
 
-    print('stack', stack)
+    print('stack', global_dict[guest_id]['stack'])
 
     return image
 
@@ -209,12 +215,12 @@ def get_layout_image(ocrs):
 
 
 
-def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
+def text_to_image(guest_id, prompt,keywords,positive_prompt,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
 
     print(f'[info] Prompt: {prompt} | Keywords: {keywords} | Radio: {radio} | Steps: {slider_step} | Guidance: {slider_guidance} | Natural: {slider_natural}')
 
-    global stack
-    global state
+    # global stack
+    # global state
 
     if len(positive_prompt.strip()) != 0:
         prompt += positive_prompt
@@ -229,7 +235,7 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
             prompt = tokenizer.encode(user_prompt)
             layout_image = None
         else:
-            if len(stack) == 0:
+            if len(global_dict[guest_id]['stack']) == 0:
 
                 if len(keywords.strip()) == 0:
                     template = f'Given a prompt that will be used to generate an image, plan the layout of visual text for the image. The size of the image is 128x128. Therefore, all properties of the positions should not exceed 128, including the coordinates of top, left, right, and bottom. All keywords are included in the caption. You dont need to specify the details of font styles. At each line, the format should be keyword left, top, right, bottom. So let us begin. Prompt: {user_prompt}'
@@ -313,7 +319,7 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
                 user_prompt += ' <|endoftext|>'
                 layout_image = None
                 
-                for items in stack:
+                for items in global_dict[guest_id]['stack']:
                     position, text = items
 
                     
@@ -407,6 +413,14 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
         
 with gr.Blocks() as demo:
 
+
+    guest_id = random.randint(0,100000000)
+    # register
+    global_dict[guest_id] = {
+        'state': 0,
+        'stack': []
+    }
+
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
@@ -447,21 +461,17 @@ with gr.Blocks() as demo:
                 keywords = gr.Textbox(label="(Optional) Keywords. Should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
                 positive_prompt = gr.Textbox(label="(Optional) Positive prompt", value=", digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
 
-                # # many encounter concurrent problem
-                # with gr.Accordion("(Optional) Template - Click to paint", open=False):
-                #     with gr.Row():
-                #         with gr.Column(scale=1):
-                #             i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
-                #         with gr.Column(scale=1):
-                #             t = gr.Textbox(label="Keyword", value='input_keyword')
-                #             redo = gr.Button(value='Redo - Cancel the last keyword') 
-                #             undo = gr.Button(value='Undo - Clear the canvas') 
-                #             skip_button = gr.Button(value='Skip - Operate the next keyword') 
+                # many encounter concurrent problem
+                with gr.Accordion("(Optional) Template - Click to paint", open=False):
+                    with gr.Row():
+                        with gr.Column(scale=1):
+                            i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
+                        with gr.Column(scale=1):
+                            t = gr.Textbox(label="Keyword", value='input_keyword')
+                            redo = gr.Button(value='Redo - Cancel the last keyword') 
+                            undo = gr.Button(value='Undo - Clear the canvas') 
+                            skip_button = gr.Button(value='Skip - Operate the next keyword') 
 
-                # i.select(get_pixels,[i,t],[i])
-                # redo.click(exe_redo, [i,t],[i])
-                # undo.click(exe_undo, [i,t],[i])
-                # skip_button.click(skip_fun, [i,t])
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
@@ -471,6 +481,13 @@ with gr.Blocks() as demo:
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=1.4, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
                 # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
                 button = gr.Button("Generate")
+
+                guest_id_box = gr.Textbox(label="guest_id", value=f"{guest_id}")
+                i.select(get_pixels,[i,t,guest_id_box],[i])
+                redo.click(exe_redo, [i,t,guest_id_box],[i])
+                undo.click(exe_undo, [i,t,guest_id_box],[i])
+                skip_button.click(skip_fun, [i,t,guest_id_box])
+
                             
             with gr.Column(scale=1):
                 output = gr.Gallery(label='Generated image')
@@ -482,7 +499,7 @@ with gr.Blocks() as demo:
                     layout = gr.Image(height=256, width=256)
 
 
-        button.click(text_to_image, inputs=[prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt, layout])
+        button.click(text_to_image, inputs=[guest_id, prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt, layout])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
