@@ -437,7 +437,7 @@ with gr.Blocks() as demo:
                 undo.click(exe_undo, [i,t],[i])
                 skip_button.click(skip_fun, [i,t])
 
-                radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choices of models", value="TextDiffuser-2")
+                radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2.")
                 slider_guidance = gr.Slider(minimum=1, maximum=9, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
                 slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
@@ -489,6 +489,22 @@ with gr.Blocks() as demo:
         <b>Disclaimer</b>: 
         Please note that the demo is intended for academic and research purposes <b>ONLY</b>. Any use of the demo for generating inappropriate content is strictly prohibited. The responsibility for any misuse or inappropriate use of the demo lies solely with the users who generated such content, and this demo shall not be held liable for any such use.
         </h3>
+        </div>
+        <div>
+        <!-- Default Statcounter code for Business
+        https://huggingface.co/spaces/JingyeChen22/TextDiffuser-2 -->
+        <script type="text/javascript">
+        var sc_project=12947957; 
+        var sc_invisible=1; 
+        var sc_security="a79edbfe"; 
+        </script>
+        <script type="text/javascript"
+        src="https://www.statcounter.com/counter/counter.js" async></script>
+        <noscript><div class="statcounter"><a title="Web Analytics"
+        href="https://statcounter.com/" target="_blank"><img class="statcounter"
+        src="https://c.statcounter.com/12947957/0/a79edbfe/1/" alt="Web Analytics"
+        referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+        <!-- End of Statcounter Code -->
         </div>
         """
     )
