@@ -211,6 +211,8 @@ def get_layout_image(ocrs):
 
 def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
 
+    print(f'[info] Prompt: {prompt} | Keywords: {keywords} | Radio: {radio} | Steps: {slider_step} | Guidance: {slider_guidance} | Natural: {slider_natural}')
+
     global stack
     global state
 
