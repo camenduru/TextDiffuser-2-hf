@@ -447,21 +447,21 @@ with gr.Blocks() as demo:
                 keywords = gr.Textbox(label="(Optional) Keywords. Should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
                 positive_prompt = gr.Textbox(label="(Optional) Positive prompt", value=", digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
 
-                # many encounter concurrent problem
-                with gr.Accordion("(Optional) Template - Click to paint", open=False):
-                    with gr.Row():
-                        with gr.Column(scale=1):
-                            i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
-                        with gr.Column(scale=1):
-                            t = gr.Textbox(label="Keyword", value='input_keyword')
-                            redo = gr.Button(value='Redo - Cancel the last keyword') 
-                            undo = gr.Button(value='Undo - Clear the canvas') 
-                            skip_button = gr.Button(value='Skip - Operate the next keyword') 
+                # # many encounter concurrent problem
+                # with gr.Accordion("(Optional) Template - Click to paint", open=False):
+                #     with gr.Row():
+                #         with gr.Column(scale=1):
+                #             i = gr.Image(label="Canvas", type='filepath', value=f'./gray256.jpg', height=256, width=256)
+                #         with gr.Column(scale=1):
+                #             t = gr.Textbox(label="Keyword", value='input_keyword')
+                #             redo = gr.Button(value='Redo - Cancel the last keyword') 
+                #             undo = gr.Button(value='Undo - Clear the canvas') 
+                #             skip_button = gr.Button(value='Skip - Operate the next keyword') 
 
-                i.select(get_pixels,[i,t],[i])
-                redo.click(exe_redo, [i,t],[i])
-                undo.click(exe_undo, [i,t],[i])
-                skip_button.click(skip_fun, [i,t])
+                # i.select(get_pixels,[i,t],[i])
+                # redo.click(exe_redo, [i,t],[i])
+                # undo.click(exe_undo, [i,t],[i])
+                # skip_button.click(skip_fun, [i,t])
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
