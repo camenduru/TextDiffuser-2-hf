@@ -373,7 +373,7 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                     prompt=user_prompt,
                     generator=generator,
                     # negative_prompt=negative_prompt,
-                    num_inference_steps=slider_step,
+                    num_inference_steps=1,
                     guidance_scale=1,
                     num_images_per_prompt=slider_batch,
                 ).images
