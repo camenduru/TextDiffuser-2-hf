@@ -34,6 +34,7 @@ if not os.path.exists('images2'):
 #     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
 
 # print(os.system('apt install mlocate'))
+os.system('nvidia-smi')
 os.system('ls')
 # print(os.system('pwd'))
 # print(os.system('locate gray256.jpg'))
@@ -43,17 +44,23 @@ os.system('ls')
 
 #### import m1
 from fastchat.model import load_model, get_conversation_template
+from transformers import AutoTokenizer, AutoModelForCausalLM
 m1_model_path = 'JingyeChen22/textdiffuser2_layout_planner'
-m1_model, m1_tokenizer = load_model(
-    m1_model_path,
-    'cuda',
-    1,
-    None,
-    False,
-    False,
-    revision="main",
-    debug=False,
-)
+# m1_model, m1_tokenizer = load_model(
+#     m1_model_path,
+#     'cuda',
+#     1,
+#     None,
+#     False,
+#     False,
+#     revision="main",
+#     debug=False,
+# )
+
+m1_tokenizer = AutoTokenizer.from_pretrained(m1_model_path, use_fast=False)
+m1_model = AutoModelForCausalLM.from_pretrained(
+    m1_model_path, torch_dtype=torch.float16, low_cpu_mem_usage=True
+).cuda()
 
 #### import diffusion models
 text_encoder = CLIPTextModel.from_pretrained(
