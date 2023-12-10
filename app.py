@@ -147,12 +147,14 @@ def get_pixels(i, t, guest_id, evt: gr.SelectData):
 
     # register
     if guest_id == '-1':
-        seed = int(time.time())
+        seed = str(int(time.time()))
         global_dict[str(seed)] = {
             'state': 0,
             'stack': []
         }
         guest_id = str(seed)
+    else:
+        seed = guest_id
 
     text_position = evt.index
 
