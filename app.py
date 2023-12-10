@@ -214,7 +214,7 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
         user_prompt = prompt
 
         if slider_natural:
-            user_prompt = f'<|startoftext|> {user_prompt} <|endoftext|>'
+            user_prompt = f'{user_prompt}'
             composed_prompt = user_prompt
             prompt = tokenizer.encode(user_prompt)
         else:
