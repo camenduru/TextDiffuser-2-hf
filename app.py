@@ -246,7 +246,7 @@ def text_to_image(guest_id, prompt,keywords,positive_prompt,radio,slider_step,sl
             prompt = tokenizer.encode(user_prompt)
             layout_image = None
         else:
-            if len(global_dict[guest_id]['stack']) == 0:
+            if guest_id not in global_dict or len(global_dict[guest_id]['stack']) == 0:
 
                 if len(keywords.strip()) == 0:
                     template = f'Given a prompt that will be used to generate an image, plan the layout of visual text for the image. The size of the image is 128x128. Therefore, all properties of the positions should not exceed 128, including the coordinates of top, left, right, and bottom. All keywords are included in the caption. You dont need to specify the details of font styles. At each line, the format should be keyword left, top, right, bottom. So let us begin. Prompt: {user_prompt}'
