@@ -475,7 +475,7 @@ with gr.Blocks() as demo:
                 with gr.Accordion("Intermediate results", open=False):
                     gr.Markdown("Composed prompt")
                     composed_prompt = gr.Textbox(label='')
-                    layout = gr.Image(height=128, width=128)
+                    layout = gr.Image(height=256, width=256)
 
 
         button.click(text_to_image, inputs=[prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt, layout])
