@@ -386,9 +386,9 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                 prompt=user_prompt,
                 generator=generator,
                 # negative_prompt=negative_prompt,
-                num_inference_steps=1,
+                num_inference_steps=slider_step,
                 guidance_scale=1,
-                num_images_per_prompt=slider_batch,
+                # num_images_per_prompt=slider_batch,
             ).images
             os.system('nvidia-smi')
             torch.cuda.empty_cache()
@@ -400,7 +400,7 @@ with gr.Blocks() as demo:
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
-        <h2 style="font-weight: 900; font-size: 2.5rem; margin: 0rem">
+        <h2 style="font-weight: 900; font-size: 2.4rem; margin: 0rem">
             TextDiffuser-2: Unleashing the Power of Language Models for Text Rendering
         </h2>
         <h2 style="font-weight: 460; font-size: 1.1rem; margin: 0rem">
