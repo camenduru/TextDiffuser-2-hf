@@ -188,10 +188,13 @@ def get_pixels(i, t, evt: gr.SelectData):
 
 
 
-def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
+def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
 
     global stack
     global state
+
+    if len(positive_prompt.strip()) != 0:
+        prompt += positive_prompt
 
     with torch.no_grad():
         time1 = time.time()
@@ -397,10 +400,7 @@ with gr.Blocks() as demo:
         We propose <b>TextDiffuser-2</b>, aiming at unleashing the power of language models for text rendering. Specifically, we <b>tame a language model into a layout planner</b> to transform user prompt into a layout using the caption-OCR pairs. The language model demonstrates flexibility and automation by inferring keywords from user prompts or incorporating user-specified keywords to determine their positions. Secondly, we <b>leverage the language model in the diffusion model as the layout encoder</b> to represent the position and content of text at the line level. This approach enables diffusion models to generate text images with broader diversity.
         </h2>
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
-        👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can increase the temperature to enhance the diversity.
-        </h2>
-        <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
-        ✨ We also provide the experimental demo combining <b>TextDiffuser-2</b> and <b>LCM</b>. The inference is fast using less sampling steps, although the precision in text rendering might decrease.
+        👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can increase the temperature to enhance the diversity. ✨ <b>(6)</b> We also provide the experimental demo combining <b>TextDiffuser-2</b> and <b>LCM</b>. The inference is fast using less sampling steps, although the precision in text rendering might decrease.
         </h2>
 
         <style>
@@ -418,6 +418,7 @@ with gr.Blocks() as demo:
             with gr.Column(scale=1):
                 prompt = gr.Textbox(label="Input your prompt here.", placeholder="A beautiful city skyline stamp of Shanghai")
                 keywords = gr.Textbox(label="(Optional) Input your keywords here. Keywords should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
+                positive_prompt = gr.Textbox(label="(Optional) Positive prompt to enhance the image quality", value=", showing different kinds of quails, digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
 
                 with gr.Accordion("(Optional) Template - Click to paint", open=False):
                     with gr.Row():
@@ -437,7 +438,7 @@ with gr.Blocks() as demo:
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2. You may decease the step to 4 when using LCM.")
                 slider_guidance = gr.Slider(minimum=1, maximum=13, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
-                slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
+                slider_batch = gr.Slider(minimum=1, maximum=4, value=6, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
                 # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
@@ -450,7 +451,7 @@ with gr.Blocks() as demo:
                     gr.Markdown("Composed prompt")
                     composed_prompt = gr.Textbox(label='')
 
-        button.click(text_to_image, inputs=[prompt,keywords,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
+        button.click(text_to_image, inputs=[prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
@@ -467,7 +468,7 @@ with gr.Blocks() as demo:
                 ["Newspaper with the title Love Story", "", False],
                 ["A logo for the company EcoGrow, where the letters look like plants", "EcoGrow", False],
                 ["A poster titled 'Quails of North America', showing different kinds of quails.", "Quails/of/North/America", False],
-                ["A detailed portrait of a fox guardian with a shield with Kung Fu written on it, by victo ngai and justin gerard, digital art, realistic painting, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation", "kung/fu", False],
+                ["A detailed portrait of a fox guardian with a shield with Kung Fu written on it, by victo ngai and justin gerard, digital art, realistic painting", "kung/fu", False],
                 ["A stamp of breath of the wild", "breath/of/the/wild", False],
                 ["Poster of the incoming movie Transformers", "Transformers", False],
                 ["Some apples are on a table", "", True],
@@ -476,10 +477,12 @@ with gr.Blocks() as demo:
                 ["a man holding a tennis racquet on a tennis court", "", True],
                 ["hamburger with bacon, lettuce, tomato and cheese| promotional image| hyperquality| products shot| full - color| extreme render| mouthwatering", "", True],
             ],
-            prompt,
-            keywords,
-            slider_natural,
-            examples_per_page=10
+            [
+                prompt,
+                keywords,
+                slider_natural
+            ],
+            examples_per_page=20
         )
 
     gr.HTML(
