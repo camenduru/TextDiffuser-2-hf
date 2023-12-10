@@ -351,8 +351,11 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                     noise_pred_cond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_cond[:slider_batch]).sample # b, 4, 64, 64
                     noise_pred_uncond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_nocond[:slider_batch]).sample # b, 4, 64, 64
                     noisy_residual = noise_pred_uncond + slider_guidance * (noise_pred_cond - noise_pred_uncond) # b, 4, 64, 64     
-                    prev_noisy_sample = scheduler.step(noisy_residual, t, input).prev_sample
-                    input = prev_noisy_sample
+                    input = scheduler.step(noisy_residual, t, input).prev_sample
+                    del noise_pred_cond
+                    del noise_pred_uncond
+
+            torch.cuda.empty_cache()
 
             # decode
             input = 1 / vae.config.scaling_factor * input 
@@ -372,6 +375,8 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
             # results.insert(0, new_image)
             # return new_image
             os.system('nvidia-smi')
+            torch.cuda.empty_cache()
+            os.system('nvidia-smi')
             return tuple(results),  composed_prompt
         
         elif radio == 'TextDiffuser-2-LCM':
@@ -384,6 +389,9 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                 guidance_scale=1,
                 num_images_per_prompt=slider_batch,
             ).images
+            os.system('nvidia-smi')
+            torch.cuda.empty_cache()
+            os.system('nvidia-smi')
             return tuple(image), composed_prompt
         
 with gr.Blocks() as demo:
