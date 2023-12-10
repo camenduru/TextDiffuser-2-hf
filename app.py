@@ -27,7 +27,7 @@ if not os.path.exists('images2'):
 
 
 # if not os.path.exists('architecture.jpg'):
-#     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/architecture.jpg')
+os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/tree/main/layout_planner_m1')
 
 # if not os.path.exists('gray256.jpg'):
 #     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
@@ -40,19 +40,19 @@ os.system('ls')
 # # print(img.size)
 # exit(0)
 
-# #### import m1
-# from fastchat.model import load_model, get_conversation_template
-# m1_model_path = '/home/jingyechen/FastChat/1204_final'
-# m1_model, m1_tokenizer = load_model(
-#     m1_model_path,
-#     'cuda',
-#     1,
-#     None,
-#     False,
-#     False,
-#     revision="main",
-#     debug=False,
-# )
+#### import m1
+from fastchat.model import load_model, get_conversation_template
+m1_model_path = './layout_planner_m1'
+m1_model, m1_tokenizer = load_model(
+    m1_model_path,
+    'cuda',
+    1,
+    None,
+    False,
+    False,
+    revision="main",
+    debug=False,
+)
 
 #### import diffusion models
 text_encoder = CLIPTextModel.from_pretrained(
