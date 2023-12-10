@@ -416,9 +416,9 @@ with gr.Blocks() as demo:
     with gr.Tab("Text-to-Image"):
         with gr.Row():
             with gr.Column(scale=1):
-                prompt = gr.Textbox(label="Input your prompt here. You can let the language model automatically identify keywords, or provide them in the 'keywords' below", placeholder="A beautiful city skyline stamp of Shanghai")
+                prompt = gr.Textbox(label="Prompt. You can let the language model automatically identify keywords, or provide them in the 'keywords' below", placeholder="A beautiful city skyline stamp of Shanghai")
                 keywords = gr.Textbox(label="(Optional) Keywords. Should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
-                positive_prompt = gr.Textbox(label="(Optional) Positive prompt to enhance the image quality", value=", showing different kinds of quails, digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
+                positive_prompt = gr.Textbox(label="(Optional) Positive prompt", value=", showing different kinds of quails, digital art, very detailed, fantasy, high definition, cinematic light, dnd, trending on artstation")
 
                 with gr.Accordion("(Optional) Template - Click to paint", open=False):
                     with gr.Row():
