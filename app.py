@@ -83,27 +83,28 @@ pipe.load_lora_weights(lcm_lora_id)
 pipe.to(device="cuda")
 
 
-
+#### for interactive
+stack = []
+state = 0   
 font = ImageFont.truetype("./Arial.ttf", 32)
 
-def skip_fun(i, t, stack, state):
-    # global state
+def skip_fun(i, t):
+    global state
     state = 0
-    return i, stack, state
 
 
-def exe_undo(i, t, stack, state):
-    # global stack
-    # global state
+def exe_undo(i, t):
+    global stack
+    global state
     state = 0
     stack = []
     image = Image.open(f'./gray256.jpg')
     print('stack', stack)
-    return image, stack, state
+    return image
 
 
-def exe_redo(i, t, stack, state):
-    # global state 
+def exe_redo(i, t):
+    global state 
     state = 0
 
     if len(stack) > 0:
@@ -133,10 +134,10 @@ def exe_redo(i, t, stack, state):
             draw.rectangle((x0,y0,x1,y1), outline=(255, 0, 0) )
 
     print('stack', stack)
-    return image, stack, state
+    return image
 
-def get_pixels(i, t, stack, state, evt: gr.SelectData):
-    # global state
+def get_pixels(i, t, evt: gr.SelectData):
+    global state
 
     text_position = evt.index
 
@@ -182,7 +183,7 @@ def get_pixels(i, t, stack, state, evt: gr.SelectData):
 
     print('stack', stack)
 
-    return image, stack, state
+    return image
 
 
 font_layout = ImageFont.truetype('./Arial.ttf', 16)
@@ -406,10 +407,6 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
         
 with gr.Blocks() as demo:
 
-    #### for interactive
-    stack = []
-    state = 0   
-
     gr.HTML(
         """
         <div style="text-align: center; max-width: 1600px; margin: 20px auto;">
@@ -461,10 +458,10 @@ with gr.Blocks() as demo:
                             undo = gr.Button(value='Undo - Clear the canvas') 
                             skip_button = gr.Button(value='Skip - Operate the next keyword') 
 
-                i.select(get_pixels,[i,t,stack,state],[i,stack,state])
-                redo.click(exe_redo, [i,t,stack,state],[i,stack,state])
-                undo.click(exe_undo, [i,t,stack,state],[i,stack,state])
-                skip_button.click(skip_fun, [i,t,stack,state], [i,stack,state])
+                i.select(get_pixels,[i,t],[i])
+                redo.click(exe_redo, [i,t],[i])
+                undo.click(exe_undo, [i,t],[i])
+                skip_button.click(skip_fun, [i,t])
 
                 radio = gr.Radio(["TextDiffuser-2", "TextDiffuser-2-LCM"], label="Choice of models", value="TextDiffuser-2")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
