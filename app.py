@@ -27,7 +27,7 @@ if not os.path.exists('images2'):
 
 
 # if not os.path.exists('architecture.jpg'):
-os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/tree/main/layout_planner_m1')
+# os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/tree/main/layout_planner_m1')
 
 # if not os.path.exists('gray256.jpg'):
 #     os.system('wget https://huggingface.co/JingyeChen22/textdiffuser2-full-ft/blob/main/gray256.jpg')
@@ -338,7 +338,8 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
             new_image.paste(image, (col*width, row*height))
         # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
         results.insert(0, new_image)
-        return new_image
+        # return new_image
+        return tuple(new_image)
     
 with gr.Blocks() as demo:
 
@@ -361,11 +362,11 @@ with gr.Blocks() as demo:
 
         <style>
             .scaled-image {
-                transform: scale(0.75);
+                transform: scale(1);
             }
         </style>
         
-        <img src="https://i.ibb.co/q1hxH0N/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
+        <img src="https://i.ibb.co/vmrXRb5/architecture.jpg" alt="textdiffuser-2" class="scaled-image">
         </div>
         """)
 
@@ -378,7 +379,7 @@ with gr.Blocks() as demo:
                 # 这里加一个会话框
                 with gr.Row():
                     with gr.Column(scale=1):
-                        i = gr.Image(label="Template", type='filepath', value=f'./gray256.jpg', height=256, width=256)
+                        i = gr.Image(label="Template (Click to paint)", type='filepath', value=f'./gray256.jpg', height=256, width=256)
                     with gr.Column(scale=1):
                         t = gr.Textbox(label="Template", placeholder='keyword')
                         redo = gr.Button(value='Redo - Cancel the last keyword') # 如何给b绑定事件
@@ -399,7 +400,7 @@ with gr.Blocks() as demo:
                 button = gr.Button("Generate")
                             
             with gr.Column(scale=1):
-                output = gr.Image(label='Generated image')
+                output = gr.Gallery(label='Generated image')
                 
                 # with gr.Accordion("Intermediate results", open=False):
                 #     gr.Markdown("Layout, segmentation mask, and details of segmentation mask from left to right.")
@@ -414,7 +415,7 @@ with gr.Blocks() as demo:
 
     gr.HTML(
         """
-        <div style="text-align: justify; max-width: 1200px; margin: 20px auto;">
+        <div style="text-align: justify; max-width: 1100px; margin: 20px auto;">
         <h3 style="font-weight: 450; font-size: 0.8rem; margin: 0rem">
         <b>Version</b>: 1.0
         </h3>
