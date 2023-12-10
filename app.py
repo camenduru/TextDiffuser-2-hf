@@ -93,7 +93,7 @@ text_encoder.resize_token_embeddings(len(tokenizer))
 #### load lcm components
 model_id = "lambdalabs/sd-pokemon-diffusers"
 lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
-pipe = DiffusionPipeline.from_pretrained(model_id, unet=unet, tokenizer=tokenizer, text_encoder=text_encoder)
+pipe = DiffusionPipeline.from_pretrained(model_id, unet=unet, tokenizer=tokenizer, text_encoder=text_encoder, torch_dtype=torch.float16)
 pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
 pipe.load_lora_weights(lcm_lora_id)
 pipe.to(device="cuda")
@@ -343,7 +343,7 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
             input = noise.half()
 
             encoder_hidden_states_cond = text_encoder(prompts_cond)[0].half()
-            encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] .half()
+            encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0].half()
 
 
             for t in tqdm(scheduler.timesteps):
