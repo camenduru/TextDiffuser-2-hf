@@ -23,7 +23,7 @@ if not os.path.exists('images2'):
     with zipfile.ZipFile('images2.zip', 'r') as zip_ref:
         zip_ref.extractall('.')
 
-os.system('nvidia-smi')
+# os.system('nvidia-smi')
 os.system('ls')
 
 #### import m1
@@ -186,6 +186,27 @@ def get_pixels(i, t, evt: gr.SelectData):
     return image
 
 
+font_layout = ImageFont.truetype('./Arial.ttf', 16)
+
+def get_layout_image(ocrs):
+
+    blank = Image.new('RGB', (256,256), (0,0,0))
+    draw = ImageDraw.ImageDraw(blank)
+
+    for line in ocrs.split('\n'):
+        line = line.strip()
+
+        if len(line) == 0:
+            break
+
+        pred = ' '.join(line.split()[:-1])
+        box = line.split()[-1]
+        l, t, r, b = [int(i)*2 for i in box.split(',')] # the size of canvas is 256x256
+        draw.rectangle([(l, t), (r, b)], outline ="red")
+        draw.text((l, t), pred, font=font_layout)
+    
+    return blank
+
 
 
 def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural):
@@ -204,6 +225,7 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
             user_prompt = f'{user_prompt}'
             composed_prompt = user_prompt
             prompt = tokenizer.encode(user_prompt)
+            layout_image = None
         else:
             if len(stack) == 0:
 
@@ -245,6 +267,8 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
                 # user_prompt = prompt
                 current_ocr = ocrs
 
+                layout_image = get_layout_image(ocrs)
+
                 ocr_ids = [] 
                 print('user_prompt', user_prompt)
                 print('current_ocr', current_ocr)
@@ -284,7 +308,7 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
             
             else:
                 user_prompt += ' <|endoftext|>'
-
+                layout_image = None
                 
                 for items in stack:
                     position, text = items
@@ -358,10 +382,10 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
                 row = index // 2
                 col = index % 2
                 new_image.paste(image, (col*width, row*height))
-            os.system('nvidia-smi')
+            # os.system('nvidia-smi')
             torch.cuda.empty_cache()
-            os.system('nvidia-smi')
-            return tuple(results),  composed_prompt
+            # os.system('nvidia-smi')
+            return tuple(results),  composed_prompt, layout_image
         
         elif radio == 'TextDiffuser-2-LCM':
             generator = torch.Generator(device=pipe.device).manual_seed(random.randint(0,1000))
@@ -373,10 +397,10 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
                 guidance_scale=1,
                 # num_images_per_prompt=slider_batch,
             ).images
-            os.system('nvidia-smi')
+            # os.system('nvidia-smi')
             torch.cuda.empty_cache()
-            os.system('nvidia-smi')
-            return tuple(image), composed_prompt
+            # os.system('nvidia-smi')
+            return tuple(image), composed_prompt, layout_image
         
 with gr.Blocks() as demo:
 
@@ -428,7 +452,7 @@ with gr.Blocks() as demo:
                             t = gr.Textbox(label="Keyword", value='input_keyword')
                             redo = gr.Button(value='Redo - Cancel the last keyword') 
                             undo = gr.Button(value='Undo - Clear the canvas') 
-                            skip_button = gr.Button(value='Skip - Operate next keyword') 
+                            skip_button = gr.Button(value='Skip - Operate the next keyword') 
 
                 i.select(get_pixels,[i,t],[i])
                 redo.click(exe_redo, [i,t],[i])
@@ -439,8 +463,8 @@ with gr.Blocks() as demo:
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
                 slider_step = gr.Slider(minimum=1, maximum=50, value=20, step=1, label="Sampling step", info="The sampling step for TextDiffuser-2. You may decease the step to 4 when using LCM.")
                 slider_guidance = gr.Slider(minimum=1, maximum=13, value=7.5, step=0.5, label="Scale of classifier-free guidance", info="The scale of cfg and is set to 7.5 in default. When using LCM, cfg is set to 1.")
-                slider_batch = gr.Slider(minimum=1, maximum=6, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
-                slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
+                slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
+                slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=1.4, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
                 # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
                 button = gr.Button("Generate")
                             
@@ -450,8 +474,10 @@ with gr.Blocks() as demo:
                 with gr.Accordion("Intermediate results", open=False):
                     gr.Markdown("Composed prompt")
                     composed_prompt = gr.Textbox(label='')
+                    layout = gr.Image()
 
-        button.click(text_to_image, inputs=[prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt])
+
+        button.click(text_to_image, inputs=[prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt, layout])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
