@@ -260,6 +260,8 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
                 )
                 print(f"[{conv.roles[0]}]\n{msg}")
                 print(f"[{conv.roles[1]}]\n{outputs}")
+                layout_image = get_layout_image(outputs)
+
                 ocrs = outputs.split('\n')
                 time2 = time.time()
                 print(time2-time1)
@@ -267,7 +269,6 @@ def text_to_image(prompt,keywords,positive_prompt,radio,slider_step,slider_guida
                 # user_prompt = prompt
                 current_ocr = ocrs
 
-                layout_image = get_layout_image(ocrs)
 
                 ocr_ids = [] 
                 print('user_prompt', user_prompt)
