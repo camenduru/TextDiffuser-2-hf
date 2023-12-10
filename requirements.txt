@@ -5,3 +5,4 @@ accelerate==0.22.0
 diffusers==0.24.0
 fschat==0.2.26
 pillow==10.1.0
+sentencepiece
