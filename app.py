@@ -269,6 +269,8 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
                 prompt = caption_ids + ocr_ids
             except:
                 prompt = caption_ids
+
+            composed_prompt = tokenizer.decode(prompt)
         
         else:
             user_prompt += ' <|endoftext|>'
@@ -291,6 +293,7 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
                     text_str = ' '.join([f'[{c}]' for c in list(text)])
                     user_prompt += f'<|startoftext|> l{x0} t{y0} r{x1} b{y1} {text_str} <|endoftext|>'
 
+                composed_prompt = user_prompt
                 prompt = tokenizer.encode(user_prompt)
 
         prompt = prompt[:77]
@@ -339,7 +342,7 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
         # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
         results.insert(0, new_image)
         # return new_image
-        return tuple(new_image)
+        return tuple(results),  composed_prompt
     
 with gr.Blocks() as demo:
 
@@ -401,6 +404,10 @@ with gr.Blocks() as demo:
                             
             with gr.Column(scale=1):
                 output = gr.Gallery(label='Generated image')
+
+                with gr.Accordion("Intermediate results", open=False):
+                    gr.Markdown("Composed prompt")
+                    composed_prompt = gr.Textbox(label='')
                 
                 # with gr.Accordion("Intermediate results", open=False):
                 #     gr.Markdown("Layout, segmentation mask, and details of segmentation mask from left to right.")
@@ -408,9 +415,19 @@ with gr.Blocks() as demo:
         
         # gr.Markdown("## Prompt Examples")
 
-        button.click(text_to_image, inputs=[prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature], outputs=[output])
+        button.click(text_to_image, inputs=[prompt,keywords,slider_step,slider_guidance,slider_batch,slider_temperature], outputs=[output, composed_prompt])
 
-       
+        gr.Markdown("## Prompt Examples")
+        gr.Examples(
+            [
+                ["A beautiful city skyline stamp of Shanghai", ""],
+                ["A book cover named summer vibe", ""],
+            ],
+            prompt,
+            keywords,
+            examples_per_page=10
+        )
+
 
 
     gr.HTML(
