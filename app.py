@@ -145,6 +145,14 @@ def exe_redo(i, t, guest_id):
 def get_pixels(i, t, guest_id, evt: gr.SelectData):
     # global state
 
+    # register
+    if guest_id == '-1':
+        seed = int(time.time())
+        global_dict[str(seed)] = {
+            'state': 0,
+            'stack': []
+        }
+
     text_position = evt.index
 
     if global_dict[guest_id]['state'] == 0:
@@ -189,7 +197,7 @@ def get_pixels(i, t, guest_id, evt: gr.SelectData):
 
     print('stack', global_dict[guest_id]['stack'])
 
-    return image
+    return image, seed
 
 
 font_layout = ImageFont.truetype('./Arial.ttf', 16)
@@ -414,12 +422,9 @@ def text_to_image(guest_id, prompt,keywords,positive_prompt,radio,slider_step,sl
 with gr.Blocks() as demo:
 
 
-    guest_id = random.randint(0,100000000)
+    # guest_id = random.randint(0,100000000)
     # register
-    global_dict[str(guest_id)] = {
-        'state': 0,
-        'stack': []
-    }
+
 
     gr.HTML(
         """
@@ -482,8 +487,10 @@ with gr.Blocks() as demo:
                 # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
                 button = gr.Button("Generate")
 
-                guest_id_box = gr.Textbox(label="guest_id", value=f"{guest_id}")
-                i.select(get_pixels,[i,t,guest_id_box],[i])
+
+
+                guest_id_box = gr.Textbox(label="guest_id", value=f"-1")
+                i.select(get_pixels,[i,t,guest_id_box],[i,guest_id_box])
                 redo.click(exe_redo, [i,t,guest_id_box],[i])
                 undo.click(exe_undo, [i,t,guest_id_box],[i])
                 skip_button.click(skip_fun, [i,t,guest_id_box])
