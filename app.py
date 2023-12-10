@@ -65,7 +65,7 @@ m1_model = AutoModelForCausalLM.from_pretrained(
 #### import diffusion models
 text_encoder = CLIPTextModel.from_pretrained(
     'JingyeChen22/textdiffuser2-full-ft', subfolder="text_encoder", ignore_mismatched_sizes=True
-).cuda()
+).half().cuda()
 tokenizer = CLIPTokenizer.from_pretrained(
     'runwayml/stable-diffusion-v1-5', subfolder="tokenizer"
 )
@@ -83,10 +83,10 @@ for c in alphabet:
 print(len(tokenizer))
 print('***************')
 
-vae = AutoencoderKL.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="vae").cuda()
+vae = AutoencoderKL.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="vae").half().cuda()
 unet = UNet2DConditionModel.from_pretrained(
     'JingyeChen22/textdiffuser2-full-ft', subfolder="unet"
-).cuda()
+).half().cuda()
 text_encoder.resize_token_embeddings(len(tokenizer))
 
 
@@ -340,10 +340,10 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
             scheduler = DDPMScheduler.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="scheduler") 
             scheduler.set_timesteps(slider_step) 
             noise = torch.randn((slider_batch, 4, 64, 64)).to("cuda") 
-            input = noise
+            input = noise.half()
 
-            encoder_hidden_states_cond = text_encoder(prompts_cond)[0]
-            encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] 
+            encoder_hidden_states_cond = text_encoder(prompts_cond)[0].half()
+            encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] .half()
 
 
             for t in tqdm(scheduler.timesteps):
@@ -355,7 +355,7 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                     del noise_pred_cond
                     del noise_pred_uncond
 
-            torch.cuda.empty_cache()
+                    torch.cuda.empty_cache()
 
             # decode
             input = 1 / vae.config.scaling_factor * input 
@@ -363,7 +363,7 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
             width, height = 512, 512
             results = []
             new_image = Image.new('RGB', (2*width, 2*height))
-            for index, image in enumerate(images.float()):
+            for index, image in enumerate(images.cpu().float()):
                 image = (image / 2 + 0.5).clamp(0, 1).unsqueeze(0)
                 image = image.cpu().permute(0, 2, 3, 1).numpy()[0]
                 image = Image.fromarray((image * 255).round().astype("uint8")).convert('RGB')
