@@ -10,6 +10,7 @@ from tqdm import tqdm
 from PIL import Image
 from PIL import Image, ImageDraw, ImageFont
 import random
+import copy
 
 import string
 alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase + string.punctuation + ' '  # len(aphabet) = 95
@@ -90,13 +91,13 @@ unet = UNet2DConditionModel.from_pretrained(
 text_encoder.resize_token_embeddings(len(tokenizer))
 
 
-# #### load lcm components
-# model_id = "lambdalabs/sd-pokemon-diffusers"
-# lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
-# pipe = DiffusionPipeline.from_pretrained(model_id, unet=unet, tokenizer=tokenizer, text_encoder=text_encoder, torch_dtype=torch.float16)
-# pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
-# pipe.load_lora_weights(lcm_lora_id)
-# pipe.to(device="cuda")
+#### load lcm components
+model_id = "lambdalabs/sd-pokemon-diffusers"
+lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
+pipe = DiffusionPipeline.from_pretrained(model_id, unet=copy.deepcopy(unet), tokenizer=tokenizer, text_encoder=copy.deepcopy(text_encoder), torch_dtype=torch.float16)
+pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
+pipe.load_lora_weights(lcm_lora_id)
+pipe.to(device="cuda")
 
 
 #### for interactive
