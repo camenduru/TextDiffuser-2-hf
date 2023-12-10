@@ -319,66 +319,66 @@ def text_to_image(prompt,keywords,radio,slider_step,slider_guidance,slider_batch
                     while len(prompt) < 77: 
                         prompt.append(tokenizer.pad_token_id) 
 
-            if radio == 'TextDiffuser-2':
-                
-                prompts_cond = prompt
-                prompts_nocond = [tokenizer.pad_token_id]*77
-
-                prompts_cond = [prompts_cond] * slider_batch
-                prompts_nocond = [prompts_nocond] * slider_batch
-
-                prompts_cond = torch.Tensor(prompts_cond).long().cuda()
-                prompts_nocond = torch.Tensor(prompts_nocond).long().cuda()
-
-                scheduler = DDPMScheduler.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="scheduler") 
-                scheduler.set_timesteps(slider_step) 
-                noise = torch.randn((slider_batch, 4, 64, 64)).to("cuda") 
-                input = noise
-
-                encoder_hidden_states_cond = text_encoder(prompts_cond)[0]
-                encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] 
-
-
-                for t in tqdm(scheduler.timesteps):
-                    with torch.no_grad():  # classifier free guidance
-                        noise_pred_cond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_cond[:slider_batch]).sample # b, 4, 64, 64
-                        noise_pred_uncond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_nocond[:slider_batch]).sample # b, 4, 64, 64
-                        noisy_residual = noise_pred_uncond + slider_guidance * (noise_pred_cond - noise_pred_uncond) # b, 4, 64, 64     
-                        prev_noisy_sample = scheduler.step(noisy_residual, t, input).prev_sample
-                        input = prev_noisy_sample
-
-                # decode
-                input = 1 / vae.config.scaling_factor * input 
-                images = vae.decode(input, return_dict=False)[0] 
-                width, height = 512, 512
-                results = []
-                new_image = Image.new('RGB', (2*width, 2*height))
-                for index, image in enumerate(images.float()):
-                    image = (image / 2 + 0.5).clamp(0, 1).unsqueeze(0)
-                    image = image.cpu().permute(0, 2, 3, 1).numpy()[0]
-                    image = Image.fromarray((image * 255).round().astype("uint8")).convert('RGB')
-                    results.append(image)
-                    row = index // 2
-                    col = index % 2
-                    new_image.paste(image, (col*width, row*height))
-                # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
-                # results.insert(0, new_image)
-                # return new_image
-                os.system('nvidia-smi')
-                return tuple(results),  composed_prompt
+        if radio == 'TextDiffuser-2':
             
-            elif radio == 'TextDiffuser-2-LCM':
-                generator = torch.Generator(device=pipe.device).manual_seed(random.randint(0,1000))
-                image = pipe(
-                    prompt=user_prompt,
-                    generator=generator,
-                    # negative_prompt=negative_prompt,
-                    num_inference_steps=1,
-                    guidance_scale=1,
-                    num_images_per_prompt=slider_batch,
-                ).images
-                return tuple(image), composed_prompt
-            
+            prompts_cond = prompt
+            prompts_nocond = [tokenizer.pad_token_id]*77
+
+            prompts_cond = [prompts_cond] * slider_batch
+            prompts_nocond = [prompts_nocond] * slider_batch
+
+            prompts_cond = torch.Tensor(prompts_cond).long().cuda()
+            prompts_nocond = torch.Tensor(prompts_nocond).long().cuda()
+
+            scheduler = DDPMScheduler.from_pretrained('runwayml/stable-diffusion-v1-5', subfolder="scheduler") 
+            scheduler.set_timesteps(slider_step) 
+            noise = torch.randn((slider_batch, 4, 64, 64)).to("cuda") 
+            input = noise
+
+            encoder_hidden_states_cond = text_encoder(prompts_cond)[0]
+            encoder_hidden_states_nocond = text_encoder(prompts_nocond)[0] 
+
+
+            for t in tqdm(scheduler.timesteps):
+                with torch.no_grad():  # classifier free guidance
+                    noise_pred_cond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_cond[:slider_batch]).sample # b, 4, 64, 64
+                    noise_pred_uncond = unet(sample=input, timestep=t, encoder_hidden_states=encoder_hidden_states_nocond[:slider_batch]).sample # b, 4, 64, 64
+                    noisy_residual = noise_pred_uncond + slider_guidance * (noise_pred_cond - noise_pred_uncond) # b, 4, 64, 64     
+                    prev_noisy_sample = scheduler.step(noisy_residual, t, input).prev_sample
+                    input = prev_noisy_sample
+
+            # decode
+            input = 1 / vae.config.scaling_factor * input 
+            images = vae.decode(input, return_dict=False)[0] 
+            width, height = 512, 512
+            results = []
+            new_image = Image.new('RGB', (2*width, 2*height))
+            for index, image in enumerate(images.float()):
+                image = (image / 2 + 0.5).clamp(0, 1).unsqueeze(0)
+                image = image.cpu().permute(0, 2, 3, 1).numpy()[0]
+                image = Image.fromarray((image * 255).round().astype("uint8")).convert('RGB')
+                results.append(image)
+                row = index // 2
+                col = index % 2
+                new_image.paste(image, (col*width, row*height))
+            # new_image.save(f'{args.output_dir}/pred_img_{sample_index}_{args.local_rank}.jpg')
+            # results.insert(0, new_image)
+            # return new_image
+            os.system('nvidia-smi')
+            return tuple(results),  composed_prompt
+        
+        elif radio == 'TextDiffuser-2-LCM':
+            generator = torch.Generator(device=pipe.device).manual_seed(random.randint(0,1000))
+            image = pipe(
+                prompt=user_prompt,
+                generator=generator,
+                # negative_prompt=negative_prompt,
+                num_inference_steps=1,
+                guidance_scale=1,
+                num_images_per_prompt=slider_batch,
+            ).images
+            return tuple(image), composed_prompt
+        
 with gr.Blocks() as demo:
 
     gr.HTML(
