@@ -42,7 +42,7 @@ os.system('ls')
 
 #### import m1
 from fastchat.model import load_model, get_conversation_template
-m1_model_path = './layout_planner_m1'
+m1_model_path = 'JingyeChen22/textdiffuser2_layout_planner'
 m1_model, m1_tokenizer = load_model(
     m1_model_path,
     'cuda',
@@ -356,7 +356,7 @@ with gr.Blocks() as demo:
         We propose <b>TextDiffuser-2</b>, aiming at unleashing the power of language models for text rendering. Specifically, we <b>tame a language model into a layout planner</b> to transform user prompt into a layout using the caption-OCR pairs. The language model demonstrates flexibility and automation by inferring keywords from user prompts or incorporating user-specified keywords to determine their positions. Secondly, we <b>leverage the language model in the diffusion model as the layout encoder</b> to represent the position and content of text at the line level. This approach enables diffusion models to generate text images with broader diversity.
         </h2>
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
-        👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can control the temperature
+        👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can increase the temperature to enhance the diversity.
         </h2>
 
         <style>
