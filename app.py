@@ -475,6 +475,7 @@ with gr.Blocks() as demo:
                 with gr.Accordion("Intermediate results", open=False):
                     gr.Markdown("Composed prompt")
                     composed_prompt = gr.Textbox(label='')
+                    gr.Markdown("Layout visualization")
                     layout = gr.Image(height=256, width=256)
 
 
