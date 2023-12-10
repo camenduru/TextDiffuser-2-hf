@@ -493,22 +493,6 @@ with gr.Blocks() as demo:
         Please note that the demo is intended for academic and research purposes <b>ONLY</b>. Any use of the demo for generating inappropriate content is strictly prohibited. The responsibility for any misuse or inappropriate use of the demo lies solely with the users who generated such content, and this demo shall not be held liable for any such use.
         </h3>
         </div>
-        <div>
-        <!-- Default Statcounter code for Business
-        https://huggingface.co/spaces/JingyeChen22/TextDiffuser-2 -->
-        <script type="text/javascript">
-        var sc_project=12947957; 
-        var sc_invisible=1; 
-        var sc_security="a79edbfe"; 
-        </script>
-        <script type="text/javascript"
-        src="https://www.statcounter.com/counter/counter.js" async></script>
-        <noscript><div class="statcounter"><a title="Web Analytics"
-        href="https://statcounter.com/" target="_blank"><img class="statcounter"
-        src="https://c.statcounter.com/12947957/0/a79edbfe/1/" alt="Web Analytics"
-        referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
-        <!-- End of Statcounter Code -->
-        </div>
         """
     )
 
