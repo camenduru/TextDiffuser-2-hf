@@ -499,7 +499,7 @@ with gr.Blocks() as demo:
                     layout = gr.Image(height=256, width=256)
 
 
-        button.click(text_to_image, inputs=[guest_id, prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt, layout])
+        button.click(text_to_image, inputs=[guest_id_box, prompt,keywords,positive_prompt, radio,slider_step,slider_guidance,slider_batch,slider_temperature,slider_natural], outputs=[output, composed_prompt, layout])
 
         gr.Markdown("## Prompt Examples")
         gr.Examples(
