@@ -416,7 +416,7 @@ with gr.Blocks() as demo:
 
     guest_id = random.randint(0,100000000)
     # register
-    global_dict[guest_id] = {
+    global_dict[str(guest_id)] = {
         'state': 0,
         'stack': []
     }
