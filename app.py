@@ -5,10 +5,11 @@ import torch
 import gradio as gr
 import time
 from transformers import CLIPTextModel, CLIPTokenizer
-from diffusers import AutoencoderKL, DDPMScheduler, StableDiffusionPipeline, UNet2DConditionModel 
+from diffusers import AutoencoderKL, DDPMScheduler, StableDiffusionPipeline, UNet2DConditionModel, DiffusionPipeline, LCMScheduler
 from tqdm import tqdm
 from PIL import Image
 from PIL import Image, ImageDraw, ImageFont
+import random
 
 import string
 alphabet = string.digits + string.ascii_lowercase + string.ascii_uppercase + string.punctuation + ' '  # len(aphabet) = 95
