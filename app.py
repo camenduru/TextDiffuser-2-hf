@@ -152,6 +152,7 @@ def get_pixels(i, t, guest_id, evt: gr.SelectData):
             'state': 0,
             'stack': []
         }
+        guest_id = str(seed)
 
     text_position = evt.index
 
