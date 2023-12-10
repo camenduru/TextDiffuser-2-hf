@@ -197,8 +197,8 @@ def text_to_image(prompt,keywords,slider_step,slider_guidance,slider_batch,slide
         user_prompt = prompt
 
         if slider_natural:
-            user_prompt += ' <|endoftext|>'
-            composed_prompt = tokenizer.decode(prompt)
+            user_prompt = f'<|startoftext|> {user_prompt} <|endoftext|>'
+            composed_prompt = user_prompt
         else:
             if len(stack) == 0:
 
@@ -384,7 +384,7 @@ with gr.Blocks() as demo:
         with gr.Row():
             with gr.Column(scale=1):
                 prompt = gr.Textbox(label="Input your prompt here.", placeholder="A beautiful city skyline stamp of Shanghai")
-                keywords = gr.Textbox(label="(Optional) Input your keywords here. Keywords should bu seperate by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
+                keywords = gr.Textbox(label="(Optional) Input your keywords here. Keywords should be seperated by / (e.g., keyword1/keyword2/...)", placeholder="keyword1/keyword2")
 
                 # 这里加一个会话框
 
@@ -409,7 +409,7 @@ with gr.Blocks() as demo:
                 slider_batch = gr.Slider(minimum=1, maximum=4, value=4, step=1, label="Batch size", info="The number of images to be sampled.")
                 slider_temperature = gr.Slider(minimum=0.1, maximum=2, value=0.7, step=0.1, label="Temperature", info="Control the diversity of layout planner. Higher value indicates more diversity.")
                 slider_natural = gr.Checkbox(label="Natural image generation", value=False, info="The text position and content info will not be incorporated.")
-                slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
+                # slider_seed = gr.Slider(minimum=1, maximum=10000, label="Seed", randomize=True)
                 button = gr.Button("Generate")
                             
             with gr.Column(scale=1):
