@@ -59,7 +59,7 @@ m1_model_path = 'JingyeChen22/textdiffuser2_layout_planner'
 
 m1_tokenizer = AutoTokenizer.from_pretrained(m1_model_path, use_fast=False)
 m1_model = AutoModelForCausalLM.from_pretrained(
-    m1_model_path, torch_dtype=torch.float16, low_cpu_mem_usage=True
+    m1_model_path, low_cpu_mem_usage=True
 ).cuda()
 
 #### import diffusion models
@@ -90,13 +90,13 @@ unet = UNet2DConditionModel.from_pretrained(
 text_encoder.resize_token_embeddings(len(tokenizer))
 
 
-#### load lcm components
-model_id = "lambdalabs/sd-pokemon-diffusers"
-lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
-pipe = DiffusionPipeline.from_pretrained(model_id, unet=unet, tokenizer=tokenizer, text_encoder=text_encoder, torch_dtype=torch.float16)
-pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
-pipe.load_lora_weights(lcm_lora_id)
-pipe.to(device="cuda")
+# #### load lcm components
+# model_id = "lambdalabs/sd-pokemon-diffusers"
+# lcm_lora_id = "latent-consistency/lcm-lora-sdv1-5"
+# pipe = DiffusionPipeline.from_pretrained(model_id, unet=unet, tokenizer=tokenizer, text_encoder=text_encoder)
+# pipe.scheduler = LCMScheduler.from_config(pipe.scheduler.config)
+# pipe.load_lora_weights(lcm_lora_id)
+# pipe.to(device="cuda")
 
 
 #### for interactive
