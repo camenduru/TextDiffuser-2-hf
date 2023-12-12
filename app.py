@@ -448,6 +448,7 @@ with gr.Blocks() as demo:
         <h3 style="font-weight: 450; font-size: 1rem; margin: 0rem"> 
         [<a href="https://arxiv.org/abs/2311.16465" style="color:blue;">arXiv</a>] 
         [<a href="https://github.com/microsoft/unilm/tree/master/textdiffuser-2" style="color:blue;">Code</a>]
+        [<a href="https://jingyechen.github.io/textdiffuser2/" style="color:blue;">Project Page</a>]
         </h3> 
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
         We propose <b>TextDiffuser-2</b>, aiming at unleashing the power of language models for text rendering. Specifically, we <b>tame a language model into a layout planner</b> to transform user prompt into a layout using the caption-OCR pairs. The language model demonstrates flexibility and automation by inferring keywords from user prompts or incorporating user-specified keywords to determine their positions. Secondly, we <b>leverage the language model in the diffusion model as the layout encoder</b> to represent the position and content of text at the line level. This approach enables diffusion models to generate text images with broader diversity.
@@ -455,7 +456,7 @@ with gr.Blocks() as demo:
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
         👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. Current verison can only support English. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can increase the temperature to enhance the diversity. ✨ <b>(6)</b> We also provide the experimental demo combining <b>TextDiffuser-2</b> and <b>LCM</b>. The inference is fast using less sampling steps, although the precision in text rendering might decrease.
         </h2>
-        <img src="file/architecture.jpg" alt="textdiffuser-2">
+        <img src="https://raw.githubusercontent.com/JingyeChen/jingyechen.github.io/master/textdiffuser2/static/images/architecture_blank.jpg" alt="textdiffuser-2">
         </div>
         """)
 
