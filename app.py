@@ -444,6 +444,7 @@ with gr.Blocks() as demo:
         <h3 style="font-weight: 450; font-size: 1rem; margin: 0rem"> 
         [<a href="https://arxiv.org/abs/2311.16465" style="color:blue;">arXiv</a>] 
         [<a href="https://github.com/microsoft/unilm/tree/master/textdiffuser-2" style="color:blue;">Code</a>]
+        [<a href="https://discord.gg/HVEcfcwdHv" style="color:blue;">Discord</a>]
         </h3> 
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
         We propose <b>TextDiffuser-2</b>, aiming at unleashing the power of language models for text rendering. Specifically, we <b>tame a language model into a layout planner</b> to transform user prompt into a layout using the caption-OCR pairs. The language model demonstrates flexibility and automation by inferring keywords from user prompts or incorporating user-specified keywords to determine their positions. Secondly, we <b>leverage the language model in the diffusion model as the layout encoder</b> to represent the position and content of text at the line level. This approach enables diffusion models to generate text images with broader diversity.
