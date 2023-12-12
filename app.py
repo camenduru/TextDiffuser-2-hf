@@ -3,6 +3,10 @@ import re
 import zipfile
 import torch
 import gradio as gr
+
+print('hello', gr.__version__)
+
+
 import time
 from transformers import CLIPTextModel, CLIPTokenizer
 from diffusers import AutoencoderKL, DDPMScheduler, StableDiffusionPipeline, UNet2DConditionModel, DiffusionPipeline, LCMScheduler
