@@ -451,7 +451,7 @@ with gr.Blocks() as demo:
         <h2 style="text-align: left; font-weight: 450; font-size: 1rem; margin-top: 0.5rem; margin-bottom: 0.5rem">
         👀 <b>Tips for using this demo</b>: <b>(1)</b> Please carefully read the disclaimer in the below. Current verison can only support English. <b>(2)</b> The specification of keywords is optional. If provided, the language model will do its best to plan layouts using the given keywords. <b>(3)</b> If a template is given, the layout planner (M1) is not used. <b>(4)</b> Three operations, including redo, undo, and skip are provided. When using skip, only the left-top point of a keyword will be recorded, resulting in more diversity but sometimes decreasing the accuracy. <b>(5)</b> The layout planner can produce different layouts. You can increase the temperature to enhance the diversity. ✨ <b>(6)</b> We also provide the experimental demo combining <b>TextDiffuser-2</b> and <b>LCM</b>. The inference is fast using less sampling steps, although the precision in text rendering might decrease.
         </h2>
-        <img src="https://i.postimg.cc/qRpvXpGp/architecture.jpg" alt="textdiffuser-2">
+        <img src="https://i.ibb.co/b32mZnx/architecture.jpg" alt="textdiffuser-2">
         </div>
         """)
 
