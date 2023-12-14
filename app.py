@@ -514,6 +514,7 @@ with gr.Blocks() as demo:
         gr.Examples(
             [
                 ["A beautiful city skyline stamp of Shanghai", "", False],
+                ["The words 'KFC VIVO50' are inscribed upon the wall in a neon light effect", "", False],
                 ["A logo of superman", "", False],
                 ["A pencil sketch of a tree with the title nothing to tree here", "", False],
                 ["handwritten signature of peter", "", False],
@@ -539,7 +540,7 @@ with gr.Blocks() as demo:
                 keywords,
                 slider_natural
             ],
-            examples_per_page=20
+            examples_per_page=25
         )
 
     gr.HTML(
