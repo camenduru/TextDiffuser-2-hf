@@ -514,7 +514,7 @@ with gr.Blocks() as demo:
         gr.Examples(
             [
                 ["A beautiful city skyline stamp of Shanghai", "", False],
-                ["The words 'KFC VIVO50' are inscribed upon the wall in a neon light effect", "", False],
+                ["The words 'KFC VIVO50' are inscribed upon the wall in a neon light effect", "KFC/VIVO50", False],
                 ["A logo of superman", "", False],
                 ["A pencil sketch of a tree with the title nothing to tree here", "", False],
                 ["handwritten signature of peter", "", False],
