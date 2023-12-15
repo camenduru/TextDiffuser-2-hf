@@ -331,7 +331,7 @@ def text_to_image(guest_id, prompt,keywords,positive_prompt,radio,slider_step,sl
                 composed_prompt = tokenizer.decode(prompt)
             
             else:
-                user_prompt += ' <|endoftext|>'
+                user_prompt += ' <|endoftext|><|startoftext|>'
                 layout_image = None
                 
                 for items in global_dict[guest_id]['stack']:
@@ -343,7 +343,7 @@ def text_to_image(guest_id, prompt,keywords,positive_prompt,radio,slider_step,sl
                         x = x // 4
                         y = y // 4
                         text_str = ' '.join([f'[{c}]' for c in list(text)])
-                        user_prompt += f'<|startoftext|> l{x} t{y} {text_str} <|endoftext|>'
+                        user_prompt += f' l{x} t{y} {text_str} <|endoftext|>'
                     elif len(position) == 4:
                         x0, y0, x1, y1 = position
                         x0 = x0 // 4
@@ -351,7 +351,7 @@ def text_to_image(guest_id, prompt,keywords,positive_prompt,radio,slider_step,sl
                         x1 = x1 // 4
                         y1 = y1 // 4
                         text_str = ' '.join([f'[{c}]' for c in list(text)])
-                        user_prompt += f'<|startoftext|> l{x0} t{y0} r{x1} b{y1} {text_str} <|endoftext|>'
+                        user_prompt += f' l{x0} t{y0} r{x1} b{y1} {text_str} <|endoftext|>'
 
                     # composed_prompt = user_prompt
                     prompt = tokenizer.encode(user_prompt)
